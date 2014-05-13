@@ -15,7 +15,7 @@ var (
 )
 
 // FLACParser represents a FLAC audio metadata tag parser
-type FLACParser struct{
+type FLACParser struct {
 	buffer *bufio.Reader
 }
 

@@ -11,7 +11,7 @@ func TestNew(t *testing.T) {
 	// Pad the MP3 magic number to make detection work without EOF
 	mp3Magic := append(mp3MagicNumber, byte(0))
 
-	var tests = []struct{
+	var tests = []struct {
 		stream []byte
 		parser Parser
 		err    error

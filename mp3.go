@@ -15,7 +15,7 @@ var (
 )
 
 // MP3Parser represents a MP3 audio metadata tag parser
-type MP3Parser struct{
+type MP3Parser struct {
 	buffer *bufio.Reader
 }
 
