@@ -15,7 +15,9 @@ var (
 )
 
 // MP3Parser represents a MP3 audio metadata tag parser
-type MP3Parser struct{}
+type MP3Parser struct{
+	buffer *bufio.Reader
+}
 
 // Format returns the name of the MP3 format
 func (m MP3Parser) Format() string {
@@ -24,9 +26,9 @@ func (m MP3Parser) Format() string {
 
 // newMP3Parser creates a parser for MP3 audio streams
 func newMP3Parser(reader *bufio.Reader) (*MP3Parser, error) {
-	// Peek at the first 3 bytes to check for MP3 magic number
-	magic, err := reader.Peek(3)
-	if err != nil {
+	// Read the first 3 bytes to check for MP3 magic number
+	magic := make([]byte, 3)
+	if _, err := reader.Read(magic); err != nil {
 		return nil, err
 	}
 
@@ -35,6 +37,8 @@ func newMP3Parser(reader *bufio.Reader) (*MP3Parser, error) {
 		return nil, ErrMP3MagicNumber
 	}
 
-	// Return MP3 parser
-	return &MP3Parser{}, nil
+	// Return MP3 parser with readed embedded
+	return &MP3Parser{
+		buffer: reader,
+	}, nil
 }

@@ -15,7 +15,9 @@ var (
 )
 
 // FLACParser represents a FLAC audio metadata tag parser
-type FLACParser struct{}
+type FLACParser struct{
+	buffer *bufio.Reader
+}
 
 // Format returns the name of the FLAC format
 func (f FLACParser) Format() string {
@@ -24,9 +26,9 @@ func (f FLACParser) Format() string {
 
 // newFLACParser creates a parser for FLAC audio streams
 func newFLACParser(reader *bufio.Reader) (*FLACParser, error) {
-	// Peek at the first 4 bytes to check for FLAC magic number
-	magic, err := reader.Peek(4)
-	if err != nil {
+	// Read the first 4 bytes to check for FLAC magic number
+	magic := make([]byte, 4)
+	if _, err := reader.Read(magic); err != nil {
 		return nil, err
 	}
 
@@ -36,5 +38,7 @@ func newFLACParser(reader *bufio.Reader) (*FLACParser, error) {
 	}
 
 	// Return FLAC parser
-	return &FLACParser{}, nil
+	return &FLACParser{
+		buffer: reader,
+	}, nil
 }
