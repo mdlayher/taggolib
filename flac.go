@@ -22,8 +22,8 @@ func (f FLACParser) Format() string {
 	return "FLAC"
 }
 
-// NewFLACParser creates a parser for FLAC audio streams
-func NewFLACParser(reader *bufio.Reader) (*FLACParser, error) {
+// newFLACParser creates a parser for FLAC audio streams
+func newFLACParser(reader *bufio.Reader) (*FLACParser, error) {
 	// Peek at the first 4 bytes to check for FLAC magic number
 	magic, err := reader.Peek(4)
 	if err != nil {

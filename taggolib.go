@@ -30,12 +30,12 @@ func New(reader io.Reader) (Parser, error) {
 
 	// Check for FLAC magic number
 	if bytes.Equal(magic, flacMagicNumber) {
-		return NewFLACParser(bufReader)
+		return newFLACParser(bufReader)
 	}
 
 	// Check for MP3 magic number
 	if bytes.Equal(magic[0:3], mp3MagicNumber) {
-		return NewMP3Parser(bufReader)
+		return newMP3Parser(bufReader)
 	}
 
 	// Unrecognized magic number

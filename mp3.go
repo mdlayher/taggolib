@@ -22,8 +22,8 @@ func (m MP3Parser) Format() string {
 	return "MP3"
 }
 
-// NewMP3Parser creates a parser for MP3 audio streams
-func NewMP3Parser(reader *bufio.Reader) (*MP3Parser, error) {
+// newMP3Parser creates a parser for MP3 audio streams
+func newMP3Parser(reader *bufio.Reader) (*MP3Parser, error) {
 	// Peek at the first 3 bytes to check for MP3 magic number
 	magic, err := reader.Peek(3)
 	if err != nil {
