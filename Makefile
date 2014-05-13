@@ -6,4 +6,4 @@ fmt:
 	golint .
 
 test:
-	go test
+	go test -v
