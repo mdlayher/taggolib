@@ -1,13 +1,14 @@
 package taggolib
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"io"
 )
 
 var (
+	// ErrInvalidStream is returned when taggolib encounters a broken input stream
+	ErrInvalidStream = errors.New("taggolib: invalid input stream")
 	// ErrUnknownFormat is returned when taggolib cannot recognize the input stream format
 	ErrUnknownFormat = errors.New("taggolib: unknown format")
 )
@@ -19,23 +20,24 @@ type Parser interface {
 
 // New creates a new Parser depending on the magic number detected in the input reader
 func New(reader io.Reader) (Parser, error) {
-	// Wrap the raw reader in a buffered one
-	bufReader := bufio.NewReader(reader)
-
-	// Peek at the first 4 bytes to check for an audio format magic number
-	magic, err := bufReader.Peek(4)
-	if err != nil {
+	// Read first byte to begin checking magic number
+	first := make([]byte, 1)
+	if _, err := reader.Read(first); err != nil {
 		return nil, err
 	}
 
 	// Check for FLAC magic number
-	if bytes.Equal(magic, flacMagicNumber) {
-		return newFLACParser(bufReader)
-	}
+	if bytes.Equal(first, []byte("f")) {
+		// Read next 3 bytes for magic number
+		magic := make([]byte, 3)
+		if _, err := reader.Read(magic); err != nil {
+			return nil, err
+		}
 
-	// Check for MP3 magic number
-	if bytes.Equal(magic[0:3], mp3MagicNumber) {
-		return newMP3Parser(bufReader)
+		// Verify FLAC magic number
+		if bytes.Equal(append(first, magic...), flacMagicNumber) {
+			return newFLACParser(reader)
+		}
 	}
 
 	// Unrecognized magic number
