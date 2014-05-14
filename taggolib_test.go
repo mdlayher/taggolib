@@ -18,6 +18,14 @@ var (
 
 		return file
 	}()
+	mp3File = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit.mp3")
+		if err != nil {
+			log.Fatalf("Could not open test MP3: %v", err)
+		}
+
+		return file
+	}()
 )
 
 // TestNew verifies that New creates the proper parser for an example input stream
@@ -33,6 +41,9 @@ func TestNew(t *testing.T) {
 	}{
 		// Check for FLAC file, with hardcoded expected tags and properties
 		{flacFile, &FLACParser{}, nil, "reference libFLAC 1.1.4 20070213", []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
+
+		// Check for MP3 file, with hardcoded expected tags and properties
+		//{mp3File, &MP3Parser{}, nil, "", []string{"Artist", "Album", "Title"}, []int{5, 192, 16, 44100}},
 
 		// Check for an unknown format
 		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},

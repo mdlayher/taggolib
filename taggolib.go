@@ -69,6 +69,20 @@ func New(reader io.ReadSeeker) (Parser, error) {
 		}
 	}
 
+	// Check for MP3 magic number
+	if bytes.Equal(first, []byte("I")) {
+		// Read next 2 bytes for magic number
+		magic := make([]byte, 2)
+		if _, err := reader.Read(magic); err != nil {
+			return nil, err
+		}
+
+		// Verify MP3 magic number
+		if bytes.Equal(append(first, magic...), mp3MagicNumber) {
+			return newMP3Parser(reader)
+		}
+	}
+
 	// Unrecognized magic number
 	return nil, ErrUnknownFormat
 }
