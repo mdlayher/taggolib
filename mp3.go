@@ -69,6 +69,16 @@ func (m MP3Parser) Date() string {
 	return m.tags[tagDate]
 }
 
+// DiscNumber returns the DiscNumber tag for this stream
+func (m MP3Parser) DiscNumber() int {
+	disc, err := strconv.Atoi(m.tags[tagDiscNumber])
+	if err != nil {
+		return 0
+	}
+
+	return disc
+}
+
 // Duration returns the time duration for this stream
 func (m MP3Parser) Duration() time.Duration {
 	// Parse length as integer
@@ -250,6 +260,7 @@ var mp3ID3v2FrameToTag = map[string]string{
 	"TLEN": mp3TagLength,
 	"TPE1": tagArtist,
 	"TPE2": tagAlbumArtist,
+	"TPOS": tagDiscNumber,
 	"TRCK": tagTrackNumber,
 	"TSSE": mp3TagEncoder,
 }

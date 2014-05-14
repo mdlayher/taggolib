@@ -14,6 +14,7 @@ const (
 	tagArtist      = "ARTIST"
 	tagComment     = "COMMENT"
 	tagDate        = "DATE"
+	tagDiscNumber  = "DISCNUMBER"
 	tagGenre       = "GENRE"
 	tagTitle       = "TITLE"
 	tagTrackNumber = "TRACKNUMBER"
@@ -36,6 +37,7 @@ type Parser interface {
 	Channels() int
 	Comment() string
 	Date() string
+	DiscNumber() int
 	Duration() time.Duration
 	Encoder() string
 	Format() string

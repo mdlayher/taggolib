@@ -77,6 +77,16 @@ func (f FLACParser) Date() string {
 	return f.tags[tagDate]
 }
 
+// DiscNumber returns the DiscNumber tag for this stream
+func (f FLACParser) DiscNumber() int {
+	disc, err := strconv.Atoi(f.tags[tagDiscNumber])
+	if err != nil {
+		return 0
+	}
+
+	return disc
+}
+
 // Duration returns the time duration for this stream
 func (f FLACParser) Duration() time.Duration {
 	return time.Duration(int64(f.properties.SampleCount)/int64(f.SampleRate())) * time.Second
