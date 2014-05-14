@@ -2,20 +2,27 @@ package taggolib
 
 import (
 	"bytes"
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
 
 // TestNew verifies that New creates the proper parser for an example input stream
 func TestNew(t *testing.T) {
+	// Read in test files
+	flacFile, err := ioutil.ReadFile("./test/tone16bit.flac")
+	if err != nil {
+		t.Fatalf("Could not open test FLAC: %v", err)
+	}
+
+	// Table of tests
 	var tests = []struct {
 		stream []byte
 		parser Parser
 		err    error
 	}{
 		// Check for FLAC file
-		// TODO: add or embed a small FLAC file for testing
-		//{flacMagicNumber, &FLACParser{}, nil},
+		{flacFile, &FLACParser{}, nil},
 
 		// Check for an unknown format
 		{[]byte("nonsense"), nil, ErrUnknownFormat},

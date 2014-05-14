@@ -1,3 +1,5 @@
+.PHONY: fmt test
+
 make:
 	go build
 
