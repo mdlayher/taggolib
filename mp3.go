@@ -189,7 +189,7 @@ func (m *MP3Parser) parseID3v2Header() error {
 
 		// Seek past extended header (minus size of uint32 read), since the information
 		// is irrelevant for tag parsing
-		if _, err := m.reader.Seek(int64(headerSize) - 4, 1); err != nil {
+		if _, err := m.reader.Seek(int64(headerSize)-4, 1); err != nil {
 			return err
 		}
 	}
