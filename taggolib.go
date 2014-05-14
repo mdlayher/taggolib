@@ -32,6 +32,7 @@ type Parser interface {
 	AlbumArtist() string
 	Artist() string
 	BitDepth() int
+	Bitrate() int
 	Channels() int
 	Checksum() string
 	Comment() string
@@ -46,7 +47,7 @@ type Parser interface {
 }
 
 // New creates a new Parser depending on the magic number detected in the input reader
-func New(reader io.Reader) (Parser, error) {
+func New(reader io.ReadSeeker) (Parser, error) {
 	// Read first byte to begin checking magic number
 	first := make([]byte, 1)
 	if _, err := reader.Read(first); err != nil {

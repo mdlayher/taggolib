@@ -26,8 +26,9 @@ var (
 // FLACParser represents a FLAC audio metadata tag parser
 type FLACParser struct {
 	encoder    string
+	endPos     int64
 	properties *flacStreamInfoBlock
-	reader     io.Reader
+	reader     io.ReadSeeker
 	tags       map[string]string
 }
 
@@ -49,6 +50,11 @@ func (f FLACParser) Artist() string {
 // BitDepth returns the bits-per-sample of this stream
 func (f FLACParser) BitDepth() int {
 	return int(f.properties.BitsPerSample)
+}
+
+// Bitrate calculates the audio bitrate for this stream
+func (f FLACParser) Bitrate() int {
+	return int(((f.endPos * 8) / int64(f.Duration().Seconds())) / 1024)
 }
 
 // Channels returns the number of channels for this stream
@@ -117,7 +123,7 @@ func (f FLACParser) TrackNumber() int {
 }
 
 // newFLACParser creates a parser for FLAC audio streams
-func newFLACParser(reader io.Reader) (*FLACParser, error) {
+func newFLACParser(reader io.ReadSeeker) (*FLACParser, error) {
 	// Create FLAC parser
 	parser := &FLACParser{
 		reader: reader,
@@ -132,6 +138,13 @@ func newFLACParser(reader io.Reader) (*FLACParser, error) {
 	if err := parser.parseTags(); err != nil {
 		return nil, err
 	}
+
+	// Seek to end of file to grab the final position, used to calculate bitrate
+	n, err := parser.reader.Seek(0, 2)
+	if err != nil {
+		return nil, err
+	}
+	parser.endPos = n
 
 	// Return parser
 	return parser, nil
@@ -196,8 +209,7 @@ func (f *FLACParser) parseTags() error {
 		}
 
 		// If nothing found and not last block, seek forward in stream
-		buf := make([]byte, header.BlockLength)
-		if _, err := f.reader.Read(buf); err != nil {
+		if _, err := f.reader.Seek(int64(header.BlockLength), 1); err != nil {
 			return err
 		}
 	}
