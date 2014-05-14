@@ -59,11 +59,6 @@ func (m MP3Parser) Channels() int {
 	return mp3ChannelModeMap[m.mp3Header.ChannelMode]
 }
 
-// Checksum returns the checksum for this stream
-func (m MP3Parser) Checksum() string {
-	return ""
-}
-
 // Comment returns the Comment tag for this stream
 func (m MP3Parser) Comment() string {
 	return m.tags[tagComment]

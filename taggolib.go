@@ -34,7 +34,6 @@ type Parser interface {
 	BitDepth() int
 	Bitrate() int
 	Channels() int
-	Checksum() string
 	Comment() string
 	Date() string
 	Duration() time.Duration
