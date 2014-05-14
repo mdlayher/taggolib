@@ -1,4 +1,4 @@
-.PHONY: fmt test
+.PHONY: fmt test bench
 
 make:
 	go build
@@ -9,3 +9,6 @@ fmt:
 
 test:
 	go test -v
+
+bench:
+	go test -v -run=NONE -bench=.

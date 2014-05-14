@@ -3,18 +3,25 @@ package taggolib
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"reflect"
 	"testing"
 )
 
+var (
+	// Read in test files
+	flacFile = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit.flac")
+		if err != nil {
+			log.Fatalf("Could not open test FLAC: %v", err)
+		}
+
+		return file
+	}()
+)
+
 // TestNew verifies that New creates the proper parser for an example input stream
 func TestNew(t *testing.T) {
-	// Read in test files
-	flacFile, err := ioutil.ReadFile("./test/tone16bit.flac")
-	if err != nil {
-		t.Fatalf("Could not open test FLAC: %v", err)
-	}
-
 	// Table of tests
 	var tests = []struct {
 		stream     []byte
@@ -100,5 +107,12 @@ func TestNew(t *testing.T) {
 				t.Fatalf("mismatched property SampleRate: %v != %v", parser.SampleRate(), test.properties[3])
 			}
 		}
+	}
+}
+
+// BenchmarkNew checks the performance of the New() function
+func BenchmarkNew(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(bytes.NewReader(flacFile))
 	}
 }
