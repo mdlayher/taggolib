@@ -3,6 +3,7 @@ package taggolib
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/eaburns/bit"
 )
@@ -36,6 +37,11 @@ func (f FLACParser) Channels() int {
 // Checksum returns the checksum for this stream
 func (f FLACParser) Checksum() string {
 	return f.properties.MD5Checksum
+}
+
+// Duration returns the time duration for this stream
+func (f FLACParser) Duration() time.Duration {
+	return time.Duration(int64(f.properties.SampleCount) / int64(f.SampleRate())) * time.Second
 }
 
 // SampleRate returns the sample rate in Hertz for this stream

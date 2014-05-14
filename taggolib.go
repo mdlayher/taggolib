@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"time"
 )
 
 var (
@@ -18,6 +19,7 @@ type Parser interface {
 	BitDepth() int
 	Channels() int
 	Checksum() string
+	Duration() time.Duration
 	Format() string
 	SampleRate() int
 }
