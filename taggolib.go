@@ -38,6 +38,7 @@ type Parser interface {
 	Comment() string
 	Date() string
 	Duration() time.Duration
+	Encoder() string
 	Format() string
 	Genre() string
 	SampleRate() int
