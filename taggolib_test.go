@@ -20,14 +20,15 @@ func TestNew(t *testing.T) {
 		stream     []byte
 		parser     Parser
 		err        error
+		encoder    string
 		tags       []string
 		properties []int
 	}{
 		// Check for FLAC file, with hardcoded expected tags and properties
-		{flacFile, &FLACParser{}, nil, []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
+		{flacFile, &FLACParser{}, nil, "reference libFLAC 1.1.4 20070213", []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
 
 		// Check for an unknown format
-		{[]byte("nonsense"), nil, ErrUnknownFormat, nil, nil},
+		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},
 	}
 
 	// Iterate all tests
@@ -47,6 +48,16 @@ func TestNew(t *testing.T) {
 		// Verify that the proper parser type was created
 		if reflect.TypeOf(parser) != reflect.TypeOf(test.parser) {
 			t.Fatalf("unexpected parser type: %v", reflect.TypeOf(parser))
+		}
+
+		// Discard nil parser
+		if parser == nil {
+			continue
+		}
+
+		// Check for valid encoder
+		if parser.Encoder() != test.encoder {
+			t.Fatalf("mismatched Encoder: %v != %v", parser.Encoder(), test.encoder)
 		}
 
 		// Check for valid tags
