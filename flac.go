@@ -73,7 +73,7 @@ func (f FLACParser) Date() string {
 
 // Duration returns the time duration for this stream
 func (f FLACParser) Duration() time.Duration {
-	return time.Duration(int64(f.properties.SampleCount) / int64(f.SampleRate())) * time.Second
+	return time.Duration(int64(f.properties.SampleCount)/int64(f.SampleRate())) * time.Second
 }
 
 // Encoder returns the encoder for this stream
@@ -170,8 +170,8 @@ func (f *FLACParser) parseMetadataHeader() (*flacMetadataHeader, error) {
 
 	// Generate metadata header
 	return &flacMetadataHeader{
-		LastBlock: fields[0] == 1,
-		BlockType: uint8(fields[1]),
+		LastBlock:   fields[0] == 1,
+		BlockType:   uint8(fields[1]),
 		BlockLength: uint32(fields[2]),
 	}, nil
 }

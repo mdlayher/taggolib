@@ -9,13 +9,13 @@ import (
 
 const (
 	// These constants represent the built-in tags
-	tagAlbum = "ALBUM"
+	tagAlbum       = "ALBUM"
 	tagAlbumArtist = "ALBUMARTIST"
-	tagArtist = "ARTIST"
-	tagComment = "COMMENT"
-	tagDate = "DATE"
-	tagGenre = "GENRE"
-	tagTitle = "TITLE"
+	tagArtist      = "ARTIST"
+	tagComment     = "COMMENT"
+	tagDate        = "DATE"
+	tagGenre       = "GENRE"
+	tagTitle       = "TITLE"
 	tagTrackNumber = "TRACKNUMBER"
 )
 
