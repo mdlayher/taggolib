@@ -100,5 +100,7 @@ func (f *FLACParser) parseProperties() error {
 		MD5Checksum:   fmt.Sprintf("%x", checksum),
 	}
 
+	fmt.Println(f.properties)
+
 	return nil
 }
