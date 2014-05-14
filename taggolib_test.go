@@ -121,9 +121,16 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// BenchmarkNew checks the performance of the New() function
-func BenchmarkNew(b *testing.B) {
+// BenchmarkNewFLAC checks the performance of the New() function with a FLAC file
+func BenchmarkNewFLAC(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		New(bytes.NewReader(flacFile))
+	}
+}
+
+// BenchmarkNewMP3 checks the performance of the New() function with a MP3 file
+func BenchmarkNewMP3(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(bytes.NewReader(mp3File))
 	}
 }
