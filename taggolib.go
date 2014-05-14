@@ -15,7 +15,11 @@ var (
 
 // Parser represents an audio metadata tag parser
 type Parser interface {
+	BitDepth() int
+	Channels() int
+	Checksum() string
 	Format() string
+	SampleRate() int
 }
 
 // New creates a new Parser depending on the magic number detected in the input reader

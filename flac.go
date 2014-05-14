@@ -23,6 +23,26 @@ type FLACParser struct {
 	properties *flacStreamInfoBlock
 }
 
+// BitDepth returns the bits-per-sample of this stream
+func (f FLACParser) BitDepth() int {
+	return int(f.properties.BitsPerSample)
+}
+
+// Channels returns the number of channels for this stream
+func (f FLACParser) Channels() int {
+	return int(f.properties.ChannelCount)
+}
+
+// Checksum returns the checksum for this stream
+func (f FLACParser) Checksum() string {
+	return f.properties.MD5Checksum
+}
+
+// SampleRate returns the sample rate in Hertz for this stream
+func (f FLACParser) SampleRate() int {
+	return int(f.properties.SampleRate)
+}
+
 // Format returns the name of the FLAC format
 func (f FLACParser) Format() string {
 	return "FLAC"
@@ -99,8 +119,6 @@ func (f *FLACParser) parseProperties() error {
 		SampleCount:   uint64(fields[10]),
 		MD5Checksum:   fmt.Sprintf("%x", checksum),
 	}
-
-	fmt.Println(f.properties)
 
 	return nil
 }
