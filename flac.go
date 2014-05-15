@@ -243,23 +243,26 @@ func (f *FLACParser) parseTags() error {
 		return err
 	}
 
+	// Create buffers for tag iteration
+	var tagLength uint32
+	tagBuf := make([]byte, 128)
+
 	// Begin iterating tags, and building tag map
 	tagMap := map[string]string{}
 	for i := 0; i < int(commentLength); i++ {
 		// Read tag string length
-		var tagLength uint32
 		if err := binary.Read(f.reader, binary.LittleEndian, &tagLength); err != nil {
 			return err
 		}
 
 		// Read tag string
-		tagBuf := make([]byte, tagLength)
-		if _, err := f.reader.Read(tagBuf); err != nil {
+		n, err := f.reader.Read(tagBuf[:tagLength])
+		if err != nil {
 			return err
 		}
 
 		// Split tag name and data, store in map
-		pair := strings.Split(string(tagBuf), "=")
+		pair := strings.Split(string(tagBuf[:n]), "=")
 		tagMap[strings.ToUpper(pair[0])] = pair[1]
 	}
 
