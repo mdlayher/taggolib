@@ -184,6 +184,12 @@ func (m *MP3Parser) parseID3v2Header() error {
 		Size:              uint32(fields[7]),
 	}
 
+	// Ensure ID3v2 version is supported
+	// TODO: add support for 2.2 and 2.3
+	if m.id3Header.MajorVersion != 4 {
+		return ErrUnsupportedVersion
+	}
+
 	// Check for extended header
 	if m.id3Header.Extended {
 		// Read size of extended header

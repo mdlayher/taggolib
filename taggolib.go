@@ -25,6 +25,9 @@ var (
 	ErrInvalidStream = errors.New("taggolib: invalid input stream")
 	// ErrUnknownFormat is returned when taggolib cannot recognize the input stream format
 	ErrUnknownFormat = errors.New("taggolib: unknown format")
+	// ErrUnsupportedVersion is returned when taggolib recognizes an input stream format, but
+	// can not currently handle the version specified by the input stream
+	ErrUnsupportedVersion = errors.New("taggolib: unsupported version")
 )
 
 // Parser represents an audio metadata tag parser
