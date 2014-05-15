@@ -19,9 +19,9 @@ var (
 
 // OGGParser represents a OGG audio metadata tag parser
 type OGGParser struct {
-	idHeader  *oggIDHeader
-	reader    io.ReadSeeker
-	tags      map[string]string
+	idHeader *oggIDHeader
+	reader   io.ReadSeeker
+	tags     map[string]string
 }
 
 // Album returns the Album tag for this stream
@@ -183,13 +183,13 @@ func (o *OGGParser) parseOGGIDHeader() error {
 	// Generate ID header
 	o.idHeader = &oggIDHeader{
 		VorbisVersion: uint32(fields[0]),
-		ChannelCount: uint8(fields[1]),
-		MaxBitrate: uint32(fields[2]),
-		NomBitrate: uint32(fields[3]),
-		MinBitrate: uint32(fields[4]),
-		Blocksize0: uint8(fields[5]),
-		Blocksize1: uint8(fields[6]),
-		Framing: fields[7] == 1,
+		ChannelCount:  uint8(fields[1]),
+		MaxBitrate:    uint32(fields[2]),
+		NomBitrate:    uint32(fields[3]),
+		MinBitrate:    uint32(fields[4]),
+		Blocksize0:    uint8(fields[5]),
+		Blocksize1:    uint8(fields[6]),
+		Framing:       fields[7] == 1,
 	}
 	fmt.Println(o.idHeader)
 
@@ -199,12 +199,12 @@ func (o *OGGParser) parseOGGIDHeader() error {
 
 type oggIDHeader struct {
 	VorbisVersion uint32
-	ChannelCount uint8
-	SampleRate uint32
-	MaxBitrate uint32
-	NomBitrate uint32
-	MinBitrate uint32
-	Blocksize0 uint8
-	Blocksize1 uint8
-	Framing    bool
+	ChannelCount  uint8
+	SampleRate    uint32
+	MaxBitrate    uint32
+	NomBitrate    uint32
+	MinBitrate    uint32
+	Blocksize0    uint8
+	Blocksize1    uint8
+	Framing       bool
 }
