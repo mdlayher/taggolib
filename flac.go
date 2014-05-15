@@ -224,45 +224,43 @@ func (f *FLACParser) parseTags() error {
 		}
 	}
 
+	// Create buffers for parsing vendor and tag information
+	var length uint32
+	buf := make([]byte, 128)
+
 	// Read vendor string length
-	var vendorLength uint32
-	if err := binary.Read(f.reader, binary.LittleEndian, &vendorLength); err != nil {
+	if err := binary.Read(f.reader, binary.LittleEndian, &length); err != nil {
 		return err
 	}
 
 	// Read vendor string
-	vendorBuf := make([]byte, vendorLength)
-	if _, err := f.reader.Read(vendorBuf); err != nil {
+	if _, err := f.reader.Read(buf[:length]); err != nil {
 		return err
 	}
-	f.encoder = string(vendorBuf)
+	f.encoder = string(buf[:length])
 
-	// Read comment length
+	// Read comment length (new allocation so we can use it as loop counter)
 	var commentLength uint32
 	if err := binary.Read(f.reader, binary.LittleEndian, &commentLength); err != nil {
 		return err
 	}
 
-	// Create buffers for tag iteration
-	var tagLength uint32
-	tagBuf := make([]byte, 128)
-
 	// Begin iterating tags, and building tag map
 	tagMap := map[string]string{}
 	for i := 0; i < int(commentLength); i++ {
 		// Read tag string length
-		if err := binary.Read(f.reader, binary.LittleEndian, &tagLength); err != nil {
+		if err := binary.Read(f.reader, binary.LittleEndian, &length); err != nil {
 			return err
 		}
 
 		// Read tag string
-		n, err := f.reader.Read(tagBuf[:tagLength])
+		n, err := f.reader.Read(buf[:length])
 		if err != nil {
 			return err
 		}
 
 		// Split tag name and data, store in map
-		pair := strings.Split(string(tagBuf[:n]), "=")
+		pair := strings.Split(string(buf[:n]), "=")
 		tagMap[strings.ToUpper(pair[0])] = pair[1]
 	}
 
