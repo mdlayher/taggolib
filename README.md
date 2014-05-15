@@ -10,7 +10,7 @@ to use a TagLib binding.
 Example
 =======
 
-taggolib has a very simple interface, and many tags can be accessed by simply calling an appropriatelyu-named
+taggolib has a very simple interface, and many tags can be accessed by simply calling an appropriately-named
 method with no parameters.  Below is an example script which prints out an informative one-line summary of an
 audio file's tags and properties.
 
