@@ -84,6 +84,20 @@ func New(reader io.ReadSeeker) (Parser, error) {
 		}
 	}
 
+	// Check for OGG magic number
+	if bytes.Equal(first, []byte("O")) {
+		// Read next 3 bytes for magic number
+		magic := make([]byte, 3)
+		if _, err := reader.Read(magic); err != nil {
+			return nil, err
+		}
+
+		// Verify OGG magic number
+		if bytes.Equal(append(first, magic...), oggMagicNumber) {
+			return newOGGParser(reader)
+		}
+	}
+
 	// Unrecognized magic number
 	return nil, ErrUnknownFormat
 }
