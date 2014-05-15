@@ -184,6 +184,12 @@ func (m *MP3Parser) parseID3v2Header() error {
 		Size:              uint32(fields[7]),
 	}
 
+	// Ensure ID3v2 version is supported
+	// TODO: add support for 2.2 and 2.3
+	if m.id3Header.MajorVersion != 4 {
+		return ErrUnsupportedVersion
+	}
+
 	// Check for extended header
 	if m.id3Header.Extended {
 		// Read size of extended header
@@ -204,11 +210,17 @@ func (m *MP3Parser) parseID3v2Header() error {
 
 // parseID3v2Frames parses ID3v2 frames from an MP3 stream
 func (m *MP3Parser) parseID3v2Frames() error {
-	// Continuously loop and parse frames
+	// Store discovered tags in map
 	tagMap := map[string]string{}
+
+	// Create buffers for frame information
+	frameBuf := make([]byte, 4)
+	var frameLength uint32
+	tagBuf := make([]byte, 128)
+
+	// Continuously loop and parse frames
 	for {
 		// Parse a frame title
-		frameBuf := make([]byte, 4)
 		if _, err := m.reader.Read(frameBuf); err != nil {
 			return err
 		}
@@ -225,7 +237,6 @@ func (m *MP3Parser) parseID3v2Frames() error {
 		}
 
 		// Parse the length of the frame data
-		var frameLength uint32
 		if err := binary.Read(m.reader, binary.BigEndian, &frameLength); err != nil {
 			return err
 		}
@@ -236,13 +247,14 @@ func (m *MP3Parser) parseID3v2Frames() error {
 		}
 
 		// Parse the frame data tag
-		tagBuf := make([]byte, frameLength)
-		if _, err := m.reader.Read(tagBuf); err != nil {
+		n, err := m.reader.Read(tagBuf[:frameLength])
+		if err != nil {
 			return err
 		}
 
 		// Map frame title to tag title, store frame data, stripping UTF-8 BOM
-		tagMap[mp3ID3v2FrameToTag[string(frameBuf)]] = string(tagBuf[1:])
+		// TODO: handle encodings that aren't UTF-8, stored in tagBuf[0]
+		tagMap[mp3ID3v2FrameToTag[string(frameBuf)]] = string(tagBuf[1:n])
 	}
 
 	// Store tags in parser
