@@ -25,6 +25,7 @@ var (
 
 // FLACParser represents a FLAC audio metadata tag parser
 type FLACParser struct {
+	buffer     []byte
 	encoder    string
 	endPos     int64
 	properties *flacStreamInfoBlock
@@ -136,6 +137,7 @@ func (f FLACParser) TrackNumber() int {
 func newFLACParser(reader io.ReadSeeker) (*FLACParser, error) {
 	// Create FLAC parser
 	parser := &FLACParser{
+		buffer: make([]byte, 128),
 		reader: reader,
 	}
 
@@ -169,10 +171,6 @@ type flacMetadataHeader struct {
 
 // flacStreamInfoBlock represents the metadata from a FLAC STREAMINFO block
 type flacStreamInfoBlock struct {
-	MinBlockSize  uint16
-	MaxBlockSize  uint16
-	MinFrameSize  uint32
-	MaxFrameSize  uint32
 	SampleRate    uint16
 	ChannelCount  uint8
 	BitsPerSample uint16
@@ -224,9 +222,8 @@ func (f *FLACParser) parseTags() error {
 		}
 	}
 
-	// Create buffers for parsing vendor and tag information
+	// Parse length fields
 	var length uint32
-	buf := make([]byte, 128)
 
 	// Read vendor string length
 	if err := binary.Read(f.reader, binary.LittleEndian, &length); err != nil {
@@ -234,10 +231,10 @@ func (f *FLACParser) parseTags() error {
 	}
 
 	// Read vendor string
-	if _, err := f.reader.Read(buf[:length]); err != nil {
+	if _, err := f.reader.Read(f.buffer[:length]); err != nil {
 		return err
 	}
-	f.encoder = string(buf[:length])
+	f.encoder = string(f.buffer[:length])
 
 	// Read comment length (new allocation so we can use it as loop counter)
 	var commentLength uint32
@@ -254,13 +251,13 @@ func (f *FLACParser) parseTags() error {
 		}
 
 		// Read tag string
-		n, err := f.reader.Read(buf[:length])
+		n, err := f.reader.Read(f.buffer[:length])
 		if err != nil {
 			return err
 		}
 
 		// Split tag name and data, store in map
-		pair := strings.Split(string(buf[:n]), "=")
+		pair := strings.Split(string(f.buffer[:n]), "=")
 		tagMap[strings.ToUpper(pair[0])] = pair[1]
 	}
 
@@ -282,37 +279,33 @@ func (f *FLACParser) parseProperties() error {
 		return ErrInvalidStream
 	}
 
+	// Seek forward past frame information, to sample rate
+	if _, err := f.reader.Seek(10, 1); err != nil {
+		return err
+	}
+
 	// Create and use a bit reader to parse the following fields:
-	//   16 - Minimum block size (in samples)
-	//   16 - Maximum block size (in samples)
-	//   24 - Minimum frame size (in bytes)
-	//   24 - Maximum frame size (in bytes)
 	//   20 - Sample rate
 	//    3 - Channel count (+1)
 	//    5 - Bits per sample (+1)
 	//   36 - Sample count
-	fields, err := bit.NewReader(f.reader).ReadFields(16, 16, 24, 24, 20, 3, 5, 36)
+	fields, err := bit.NewReader(f.reader).ReadFields(20, 3, 5, 36)
 	if err != nil {
 		return err
 	}
 
 	// Read the MD5 checksum of the stream
-	checksum := make([]byte, 16)
-	if _, err := f.reader.Read(checksum); err != nil {
+	if _, err := f.reader.Read(f.buffer[:16]); err != nil {
 		return ErrInvalidStream
 	}
 
 	// Store properties
 	f.properties = &flacStreamInfoBlock{
-		MinBlockSize:  uint16(fields[0]),
-		MaxBlockSize:  uint16(fields[1]),
-		MinFrameSize:  uint32(fields[2]),
-		MaxFrameSize:  uint32(fields[3]),
-		SampleRate:    uint16(fields[4]),
-		ChannelCount:  uint8(fields[5]) + 1,
-		BitsPerSample: uint16(fields[6]) + 1,
-		SampleCount:   uint64(fields[7]),
-		MD5Checksum:   fmt.Sprintf("%x", checksum),
+		SampleRate:    uint16(fields[0]),
+		ChannelCount:  uint8(fields[1]) + 1,
+		BitsPerSample: uint16(fields[2]) + 1,
+		SampleCount:   uint64(fields[3]),
+		MD5Checksum:   fmt.Sprintf("%x", f.buffer[:16]),
 	}
 
 	return nil
