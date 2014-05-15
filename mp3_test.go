@@ -19,7 +19,7 @@ func TestMP3(t *testing.T) {
 		t.Fatalf("unexpected mp3 type: %v", reflect.TypeOf(mp3))
 	}
 
-	// Very all exported methods work properly
+	// Verify all exported methods work properly
 
 	// Album
 	if mp3.Album() != "Album" {

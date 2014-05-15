@@ -19,7 +19,7 @@ func TestFLAC(t *testing.T) {
 		t.Fatalf("unexpected flac type: %v", reflect.TypeOf(flac))
 	}
 
-	// Very all exported methods work properly
+	// Verify all exported methods work properly
 
 	// Album
 	if flac.Album() != "Album" {
