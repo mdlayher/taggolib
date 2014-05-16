@@ -90,8 +90,7 @@ func New(reader io.ReadSeeker) (Parser, error) {
 	// Check for OGG magic number
 	if magicBuf[0] == byte('O') {
 		// Read next 3 bytes for magic number
-		magic := make([]byte, 3)
-		if _, err := reader.Read(magic); err != nil {
+		if _, err := reader.Read(magicBuf[1:len(oggMagicNumber)]); err != nil {
 			return nil, err
 		}
 
