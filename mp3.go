@@ -320,6 +320,14 @@ func (m *MP3Parser) parseMP3Header() error {
 		ChannelMode:   uint8(fields[8]),
 	}
 
+	// Check to make sure we are parsing MPEG Version 1, Layer 3
+	// Note: this check is correct, as these values actually map to:
+	//   - Version ID 3 -> MPEG Version 1
+	//   - Layer ID 1 -> MPEG Layer 3
+	if m.mp3Header.MPEGVersionID != 3 || m.mp3Header.MPEGLayerID != 1 {
+		return ErrUnsupportedVersion
+	}
+
 	return nil
 }
 
