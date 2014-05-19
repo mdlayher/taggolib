@@ -23,8 +23,8 @@ var (
 	flacMagicNumber = []byte("fLaC")
 )
 
-// FLACParser represents a FLAC audio metadata tag parser
-type FLACParser struct {
+// flacParser represents a FLAC audio metadata tag parser
+type flacParser struct {
 	buffer     []byte
 	encoder    string
 	endPos     int64
@@ -34,52 +34,52 @@ type FLACParser struct {
 }
 
 // Album returns the Album tag for this stream
-func (f FLACParser) Album() string {
+func (f flacParser) Album() string {
 	return f.tags[tagAlbum]
 }
 
 // AlbumArtist returns the AlbumArtist tag for this stream
-func (f FLACParser) AlbumArtist() string {
+func (f flacParser) AlbumArtist() string {
 	return f.tags[tagAlbumArtist]
 }
 
 // Artist returns the Artist tag for this stream
-func (f FLACParser) Artist() string {
+func (f flacParser) Artist() string {
 	return f.tags[tagArtist]
 }
 
 // BitDepth returns the bits-per-sample of this stream
-func (f FLACParser) BitDepth() int {
+func (f flacParser) BitDepth() int {
 	return int(f.properties.BitsPerSample)
 }
 
 // Bitrate calculates the audio bitrate for this stream
-func (f FLACParser) Bitrate() int {
+func (f flacParser) Bitrate() int {
 	return int(((f.endPos * 8) / int64(f.Duration().Seconds())) / 1024)
 }
 
 // Channels returns the number of channels for this stream
-func (f FLACParser) Channels() int {
+func (f flacParser) Channels() int {
 	return int(f.properties.ChannelCount)
 }
 
 // Checksum returns the checksum for this stream
-func (f FLACParser) Checksum() string {
+func (f flacParser) Checksum() string {
 	return f.properties.MD5Checksum
 }
 
 // Comment returns the Comment tag for this stream
-func (f FLACParser) Comment() string {
+func (f flacParser) Comment() string {
 	return f.tags[tagComment]
 }
 
 // Date returns the Date tag for this stream
-func (f FLACParser) Date() string {
+func (f flacParser) Date() string {
 	return f.tags[tagDate]
 }
 
 // DiscNumber returns the DiscNumber tag for this stream
-func (f FLACParser) DiscNumber() int {
+func (f flacParser) DiscNumber() int {
 	disc, err := strconv.Atoi(f.tags[tagDiscNumber])
 	if err != nil {
 		return 0
@@ -89,42 +89,42 @@ func (f FLACParser) DiscNumber() int {
 }
 
 // Duration returns the time duration for this stream
-func (f FLACParser) Duration() time.Duration {
+func (f flacParser) Duration() time.Duration {
 	return time.Duration(int64(f.properties.SampleCount)/int64(f.SampleRate())) * time.Second
 }
 
 // Encoder returns the encoder for this stream
-func (f FLACParser) Encoder() string {
+func (f flacParser) Encoder() string {
 	return f.encoder
 }
 
 // Format returns the name of the FLAC format
-func (f FLACParser) Format() string {
+func (f flacParser) Format() string {
 	return "FLAC"
 }
 
 // Genre returns the Genre tag for this stream
-func (f FLACParser) Genre() string {
+func (f flacParser) Genre() string {
 	return f.tags[tagGenre]
 }
 
 // SampleRate returns the sample rate in Hertz for this stream
-func (f FLACParser) SampleRate() int {
+func (f flacParser) SampleRate() int {
 	return int(f.properties.SampleRate)
 }
 
 // Tag attempts to return the raw, unprocessed tag with the specified name for this stream
-func (f FLACParser) Tag(name string) string {
+func (f flacParser) Tag(name string) string {
 	return f.tags[strings.ToUpper(name)]
 }
 
 // Title returns the Title tag for this stream
-func (f FLACParser) Title() string {
+func (f flacParser) Title() string {
 	return f.tags[tagTitle]
 }
 
 // TrackNumber returns the TrackNumber tag for this stream
-func (f FLACParser) TrackNumber() int {
+func (f flacParser) TrackNumber() int {
 	track, err := strconv.Atoi(f.tags[tagTrackNumber])
 	if err != nil {
 		return 0
@@ -133,10 +133,10 @@ func (f FLACParser) TrackNumber() int {
 	return track
 }
 
-// newFLACParser creates a parser for FLAC audio streams
-func newFLACParser(reader io.ReadSeeker) (*FLACParser, error) {
+// newflacParser creates a parser for FLAC audio streams
+func newflacParser(reader io.ReadSeeker) (*flacParser, error) {
 	// Create FLAC parser
-	parser := &FLACParser{
+	parser := &flacParser{
 		buffer: make([]byte, 128),
 		reader: reader,
 	}
@@ -179,7 +179,7 @@ type flacStreamInfoBlock struct {
 }
 
 // parseMetadataHeader retrieves metadata header information from a FLAC stream
-func (f *FLACParser) parseMetadataHeader() (*flacMetadataHeader, error) {
+func (f *flacParser) parseMetadataHeader() (*flacMetadataHeader, error) {
 	// Create and use a bit reader to parse the following fields:
 	//    1 - Last metadata block before audio (boolean)
 	//    7 - Metadata block type (should be 0, for streaminfo)
@@ -198,7 +198,7 @@ func (f *FLACParser) parseMetadataHeader() (*flacMetadataHeader, error) {
 }
 
 // parseTags retrieves metadata tags from a FLAC VORBISCOMMENT block
-func (f *FLACParser) parseTags() error {
+func (f *flacParser) parseTags() error {
 	// Continuously parse and seek through blocks until we discover the VORBISCOMMENT block
 	for {
 		header, err := f.parseMetadataHeader()
@@ -267,7 +267,7 @@ func (f *FLACParser) parseTags() error {
 }
 
 // parseProperties retrieves stream properties from a FLAC STREAMINFO block
-func (f *FLACParser) parseProperties() error {
+func (f *flacParser) parseProperties() error {
 	// Read the metadata header for STREAMINFO block
 	header, err := f.parseMetadataHeader()
 	if err != nil {

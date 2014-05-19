@@ -21,8 +21,8 @@ var (
 	mp3MagicNumber = []byte("ID3")
 )
 
-// MP3Parser represents a MP3 audio metadata tag parser
-type MP3Parser struct {
+// mp3Parser represents a MP3 audio metadata tag parser
+type mp3Parser struct {
 	id3Header *mp3ID3v2Header
 	mp3Header *mp3Header
 	reader    io.ReadSeeker
@@ -30,47 +30,47 @@ type MP3Parser struct {
 }
 
 // Album returns the Album tag for this stream
-func (m MP3Parser) Album() string {
+func (m mp3Parser) Album() string {
 	return m.tags[tagAlbum]
 }
 
 // AlbumArtist returns the AlbumArtist tag for this stream
-func (m MP3Parser) AlbumArtist() string {
+func (m mp3Parser) AlbumArtist() string {
 	return m.tags[tagAlbumArtist]
 }
 
 // Artist returns the Artist tag for this stream
-func (m MP3Parser) Artist() string {
+func (m mp3Parser) Artist() string {
 	return m.tags[tagArtist]
 }
 
 // BitDepth returns the bits-per-sample of this stream
-func (m MP3Parser) BitDepth() int {
+func (m mp3Parser) BitDepth() int {
 	return 16
 }
 
 // Bitrate calculates the audio bitrate for this stream
-func (m MP3Parser) Bitrate() int {
+func (m mp3Parser) Bitrate() int {
 	return mp3BitrateMap[m.mp3Header.Bitrate]
 }
 
 // Channels returns the number of channels for this stream
-func (m MP3Parser) Channels() int {
+func (m mp3Parser) Channels() int {
 	return mp3ChannelModeMap[m.mp3Header.ChannelMode]
 }
 
 // Comment returns the Comment tag for this stream
-func (m MP3Parser) Comment() string {
+func (m mp3Parser) Comment() string {
 	return m.tags[tagComment]
 }
 
 // Date returns the Date tag for this stream
-func (m MP3Parser) Date() string {
+func (m mp3Parser) Date() string {
 	return m.tags[tagDate]
 }
 
 // DiscNumber returns the DiscNumber tag for this stream
-func (m MP3Parser) DiscNumber() int {
+func (m mp3Parser) DiscNumber() int {
 	disc, err := strconv.Atoi(m.tags[tagDiscNumber])
 	if err != nil {
 		return 0
@@ -80,7 +80,7 @@ func (m MP3Parser) DiscNumber() int {
 }
 
 // Duration returns the time duration for this stream
-func (m MP3Parser) Duration() time.Duration {
+func (m mp3Parser) Duration() time.Duration {
 	// Parse length as integer
 	length, err := strconv.Atoi(m.tags[mp3TagLength])
 	if err != nil {
@@ -91,37 +91,37 @@ func (m MP3Parser) Duration() time.Duration {
 }
 
 // Encoder returns the encoder for this stream
-func (m MP3Parser) Encoder() string {
+func (m mp3Parser) Encoder() string {
 	return m.tags[mp3TagEncoder]
 }
 
 // Format returns the name of the MP3 format
-func (m MP3Parser) Format() string {
+func (m mp3Parser) Format() string {
 	return "MP3"
 }
 
 // Genre returns the Genre tag for this stream
-func (m MP3Parser) Genre() string {
+func (m mp3Parser) Genre() string {
 	return m.tags[tagGenre]
 }
 
 // SampleRate returns the sample rate in Hertz for this stream
-func (m MP3Parser) SampleRate() int {
+func (m mp3Parser) SampleRate() int {
 	return mp3SampleRateMap[m.mp3Header.SampleRate]
 }
 
 // Tag attempts to return the raw, unprocessed tag with the specified name for this stream
-func (m MP3Parser) Tag(name string) string {
+func (m mp3Parser) Tag(name string) string {
 	return m.tags[name]
 }
 
 // Title returns the Title tag for this stream
-func (m MP3Parser) Title() string {
+func (m mp3Parser) Title() string {
 	return m.tags[tagTitle]
 }
 
 // TrackNumber returns the TrackNumber tag for this stream
-func (m MP3Parser) TrackNumber() int {
+func (m mp3Parser) TrackNumber() int {
 	// Check for a /, such as 2/8
 	track, err := strconv.Atoi(strings.Split(m.tags[tagTrackNumber], "/")[0])
 	if err != nil {
@@ -131,10 +131,10 @@ func (m MP3Parser) TrackNumber() int {
 	return track
 }
 
-// newMP3Parser creates a parser for MP3 audio streams
-func newMP3Parser(reader io.ReadSeeker) (*MP3Parser, error) {
+// newmp3Parser creates a parser for MP3 audio streams
+func newmp3Parser(reader io.ReadSeeker) (*mp3Parser, error) {
 	// Create MP3 parser
-	parser := &MP3Parser{
+	parser := &mp3Parser{
 		reader: reader,
 	}
 
@@ -158,7 +158,7 @@ func newMP3Parser(reader io.ReadSeeker) (*MP3Parser, error) {
 }
 
 // parseID3v2Header parses the ID3v2 header at the start of an MP3 stream
-func (m *MP3Parser) parseID3v2Header() error {
+func (m *mp3Parser) parseID3v2Header() error {
 	// Create and use a bit reader to parse the following fields
 	//   8 - ID3v2 major version
 	//   8 - ID3v2 minor version
@@ -209,7 +209,7 @@ func (m *MP3Parser) parseID3v2Header() error {
 }
 
 // parseID3v2Frames parses ID3v2 frames from an MP3 stream
-func (m *MP3Parser) parseID3v2Frames() error {
+func (m *mp3Parser) parseID3v2Frames() error {
 	// Store discovered tags in map
 	tagMap := map[string]string{}
 
@@ -296,7 +296,7 @@ type mp3ID3v2ExtendedHeader struct {
 }
 
 // parseMP3Header parses the MP3 header after the ID3 headers in a MP3 stream
-func (m *MP3Parser) parseMP3Header() error {
+func (m *mp3Parser) parseMP3Header() error {
 	// Create and use a bit reader to parse the following fields
 	//  11 - MP3 frame sync (all bits set)
 	//   2 - MPEG audio version ID

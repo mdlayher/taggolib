@@ -6,16 +6,16 @@ import (
 	"testing"
 )
 
-// TestFLAC verifies that all FLACParser methods work properly
+// TestFLAC verifies that all flacParser methods work properly
 func TestFLAC(t *testing.T) {
-	// Generate a FLACParser
+	// Generate a flacParser
 	flac, err := New(bytes.NewReader(flacFile))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	// Verify that we actually got a FLAC flac
-	if reflect.TypeOf(flac) != reflect.TypeOf(&FLACParser{}) {
+	if reflect.TypeOf(flac) != reflect.TypeOf(&flacParser{}) {
 		t.Fatalf("unexpected flac type: %v", reflect.TypeOf(flac))
 	}
 

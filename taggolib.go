@@ -70,7 +70,7 @@ func New(reader io.ReadSeeker) (Parser, error) {
 
 		// Verify FLAC magic number
 		if bytes.Equal(magicBuf[:len(flacMagicNumber)], flacMagicNumber) {
-			return newFLACParser(reader)
+			return newflacParser(reader)
 		}
 	}
 
@@ -83,7 +83,7 @@ func New(reader io.ReadSeeker) (Parser, error) {
 
 		// Verify MP3 magic number
 		if bytes.Equal(magicBuf[:len(mp3MagicNumber)], mp3MagicNumber) {
-			return newMP3Parser(reader)
+			return newmp3Parser(reader)
 		}
 	}
 

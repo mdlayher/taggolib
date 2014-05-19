@@ -6,16 +6,16 @@ import (
 	"testing"
 )
 
-// TestMP3 verifies that all MP3Parser methods work properly
+// TestMP3 verifies that all mp3Parser methods work properly
 func TestMP3(t *testing.T) {
-	// Generate a MP3Parser
+	// Generate a mp3Parser
 	mp3, err := New(bytes.NewReader(mp3File))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	// Verify that we actually got a MP3 mp3
-	if reflect.TypeOf(mp3) != reflect.TypeOf(&MP3Parser{}) {
+	if reflect.TypeOf(mp3) != reflect.TypeOf(&mp3Parser{}) {
 		t.Fatalf("unexpected mp3 type: %v", reflect.TypeOf(mp3))
 	}
 

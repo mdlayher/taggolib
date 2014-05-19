@@ -40,10 +40,10 @@ func TestNew(t *testing.T) {
 		properties []int
 	}{
 		// Check for FLAC file, with hardcoded expected tags and properties
-		{flacFile, &FLACParser{}, nil, "reference libFLAC 1.1.4 20070213", []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
+		{flacFile, &flacParser{}, nil, "reference libFLAC 1.1.4 20070213", []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
 
 		// Check for MP3 file, with hardcoded expected tags and properties
-		{mp3File, &MP3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
+		{mp3File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
 
 		// Check for an unknown format
 		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},
