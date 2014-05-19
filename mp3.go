@@ -1,6 +1,7 @@
 package taggolib
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"strconv"
@@ -19,6 +20,8 @@ const (
 var (
 	// mp3MagicNumber is the magic number used to identify a MP3 audio stream
 	mp3MagicNumber = []byte("ID3")
+	// mp3APICFrame is the name of the APIC, or attached picture ID3 frame
+	mp3APICFrame = []byte("APIC")
 )
 
 // mp3Parser represents a MP3 audio metadata tag parser
@@ -162,12 +165,12 @@ func (m *mp3Parser) parseID3v2Header() error {
 	// Create and use a bit reader to parse the following fields
 	//   8 - ID3v2 major version
 	//   8 - ID3v2 minor version
-	//   1 - Unsynchronization (boolean)
-	//   1 - Extended (boolean)
-	//   1 - Experimental (boolean)
-	//   1 - Footer (boolean)
+	//   1 - Unsynchronization (boolean) (ID3v2.3+)
+	//   1 - Extended (boolean) (ID3v2.3+)
+	//   1 - Experimental (boolean) (ID3v2.3+)
+	//   1 - Footer (boolean) (ID3v2.4+)
 	//   4 - (empty)
-	//  24 - Size
+	//  32 - Size
 	fields, err := bit.NewReader(m.reader).ReadFields(8, 8, 1, 1, 1, 1, 4, 32)
 	if err != nil {
 		return err
@@ -185,9 +188,13 @@ func (m *mp3Parser) parseID3v2Header() error {
 	}
 
 	// Ensure ID3v2 version is supported
-	// TODO: add support for 2.2 and 2.3
-	if m.id3Header.MajorVersion != 4 {
+	if m.id3Header.MajorVersion != 3 && m.id3Header.MajorVersion != 4 {
 		return ErrUnsupportedVersion
+	}
+
+	// Ensure Footer boolean is not defined prior to ID3v2.4
+	if m.id3Header.MajorVersion < 4 && m.id3Header.Footer {
+		return ErrInvalidStream
 	}
 
 	// Check for extended header
@@ -246,6 +253,16 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			return err
 		}
 
+		// If frame is APIC, or "attached picture", seek past the picture
+		if bytes.Equal(frameBuf, mp3APICFrame) {
+			// Seek past picture data and continue loop
+			if _, err := m.reader.Seek(int64(frameLength), 1); err != nil {
+				return err
+			}
+
+			continue
+		}
+
 		// Parse the frame data tag
 		n, err := m.reader.Read(tagBuf[:frameLength])
 		if err != nil {
@@ -275,6 +292,7 @@ var mp3ID3v2FrameToTag = map[string]string{
 	"TPOS": tagDiscNumber,
 	"TRCK": tagTrackNumber,
 	"TSSE": mp3TagEncoder,
+	"TYER": tagDate,
 }
 
 // mp3ID3v2Header represents the MP3 ID3v2 header section
