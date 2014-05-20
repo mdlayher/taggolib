@@ -25,7 +25,9 @@ type oggParser struct {
 	idHeader *oggIDHeader
 	reader   io.ReadSeeker
 	tags     map[string]string
+	ui8      uint8
 	ui32     uint32
+	ui64     uint64
 }
 
 // Album returns the Album tag for this stream
@@ -187,15 +189,11 @@ func (o *oggParser) parseOGGPageHeader(skipMagicNumber bool) (*oggPageHeader, er
 		pageHeader.CapturePattern = oggMagicNumber
 	}
 
-	// Read other bits in an Ogg Page
-	var uint8Buf uint8
-	var uint64Buf uint64
-
 	// Version (must always be 0)
-	if err := binary.Read(o.reader, binary.LittleEndian, &uint8Buf); err != nil {
+	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui8); err != nil {
 		return nil, err
 	}
-	pageHeader.Version = uint8Buf
+	pageHeader.Version = o.ui8
 
 	// Verify mandated version 0
 	if pageHeader.Version != 0 {
@@ -203,16 +201,16 @@ func (o *oggParser) parseOGGPageHeader(skipMagicNumber bool) (*oggPageHeader, er
 	}
 
 	// Header type
-	if err := binary.Read(o.reader, binary.LittleEndian, &uint8Buf); err != nil {
+	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui8); err != nil {
 		return nil, err
 	}
-	pageHeader.HeaderType = uint8Buf
+	pageHeader.HeaderType = o.ui8
 
 	// Granule position
-	if err := binary.Read(o.reader, binary.LittleEndian, &uint64Buf); err != nil {
+	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui64); err != nil {
 		return nil, err
 	}
-	pageHeader.GranulePosition = uint64Buf
+	pageHeader.GranulePosition = o.ui64
 
 	// Bitstream serial number
 	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui32); err != nil {
@@ -233,10 +231,10 @@ func (o *oggParser) parseOGGPageHeader(skipMagicNumber bool) (*oggPageHeader, er
 	pageHeader.Checksum = o.buffer[:4]
 
 	// Page segments
-	if err := binary.Read(o.reader, binary.LittleEndian, &uint8Buf); err != nil {
+	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui8); err != nil {
 		return nil, err
 	}
-	pageHeader.PageSegments = uint8Buf
+	pageHeader.PageSegments = o.ui8
 
 	// Segment table is next, but we won't need it for tag parsing, so seek ahead
 	// size of uint8 (1 byte) multiplied by number of page segments
@@ -305,7 +303,6 @@ func (o *oggParser) parseOGGIDHeader() error {
 
 	// Read fields found in identification header
 	header := new(oggIDHeader)
-	var int8Buf uint8
 
 	// Vorbis version
 	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui32); err != nil {
@@ -319,10 +316,10 @@ func (o *oggParser) parseOGGIDHeader() error {
 	}
 
 	// Channel count
-	if err := binary.Read(o.reader, binary.LittleEndian, &int8Buf); err != nil {
+	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui8); err != nil {
 		return err
 	}
-	header.ChannelCount = int8Buf
+	header.ChannelCount = o.ui8
 
 	// uint32 x 4: sample rate, maximum bitrate, nominal bitrate, minimum bitrate
 	uint32Slice := make([]uint32, 4)
