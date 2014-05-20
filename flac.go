@@ -25,12 +25,14 @@ var (
 
 // flacParser represents a FLAC audio metadata tag parser
 type flacParser struct {
-	buffer     []byte
 	encoder    string
 	endPos     int64
 	properties *flacStreamInfoBlock
 	reader     io.ReadSeeker
 	tags       map[string]string
+
+	// Shared buffer stored as field to prevent unneeded allocations
+	buffer []byte
 }
 
 // Album returns the Album tag for this stream

@@ -20,14 +20,16 @@ var (
 
 // oggParser represents a OGG audio metadata tag parser
 type oggParser struct {
-	buffer   []byte
 	encoder  string
 	idHeader *oggIDHeader
 	reader   io.ReadSeeker
 	tags     map[string]string
-	ui8      uint8
-	ui32     uint32
-	ui64     uint64
+
+	// Shared buffer and unsigned integers stored as fields to prevent unneeded allocations
+	buffer []byte
+	ui8    uint8
+	ui32   uint32
+	ui64   uint64
 }
 
 // Album returns the Album tag for this stream
