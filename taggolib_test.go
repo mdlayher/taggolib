@@ -26,6 +26,14 @@ var (
 
 		return file
 	}()
+	oggFile = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit.ogg")
+		if err != nil {
+			log.Fatalf("Could not open test OGG: %v", err)
+		}
+
+		return file
+	}()
 )
 
 // TestNew verifies that New creates the proper parser for an example input stream
@@ -44,6 +52,9 @@ func TestNew(t *testing.T) {
 
 		// Check for MP3 file, with hardcoded expected tags and properties
 		{mp3File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
+
+		// Check for OGG file, with hardcoded expected tags and properties
+		{oggFile, &oggParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{0, 192, 16, 44100}},
 
 		// Check for an unknown format
 		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},
@@ -132,5 +143,12 @@ func BenchmarkNewFLAC(b *testing.B) {
 func BenchmarkNewMP3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		New(bytes.NewReader(mp3File))
+	}
+}
+
+// BenchmarkNewOGG checks the performance of the New() function with a OGG file
+func BenchmarkNewOGG(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(bytes.NewReader(oggFile))
 	}
 }
