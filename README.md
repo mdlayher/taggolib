@@ -7,6 +7,14 @@ taggolib is inspired by the [TagLib](http://taglib.github.io/) and [taglib-sharp
 projects.  Its goal is to provide read-only metadata access to a variety of audio formats in Go, without the need
 to use a TagLib binding.
 
+Currently, taggolib supports the following formats, with some caveats:
+
+- FLAC
+- MP3
+  - ID3v2.4 tags only (ID3v2.3 in the works)
+- OGG
+  - Cannot calculate Duration as of now (returns "zero" duration)
+
 Example
 =======
 
