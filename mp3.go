@@ -134,8 +134,8 @@ func (m mp3Parser) TrackNumber() int {
 	return track
 }
 
-// newmp3Parser creates a parser for MP3 audio streams
-func newmp3Parser(reader io.ReadSeeker) (*mp3Parser, error) {
+// newMP3Parser creates a parser for MP3 audio streams
+func newMP3Parser(reader io.ReadSeeker) (*mp3Parser, error) {
 	// Create MP3 parser
 	parser := &mp3Parser{
 		reader: reader,

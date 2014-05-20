@@ -133,8 +133,8 @@ func (f flacParser) TrackNumber() int {
 	return track
 }
 
-// newflacParser creates a parser for FLAC audio streams
-func newflacParser(reader io.ReadSeeker) (*flacParser, error) {
+// newFLACParser creates a parser for FLAC audio streams
+func newFLACParser(reader io.ReadSeeker) (*flacParser, error) {
 	// Create FLAC parser
 	parser := &flacParser{
 		buffer: make([]byte, 128),
