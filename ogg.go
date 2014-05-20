@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,8 @@ var (
 
 // oggParser represents a OGG audio metadata tag parser
 type oggParser struct {
+	duration time.Duration
+	durChan  chan struct{}
 	encoder  string
 	idHeader *oggIDHeader
 	reader   io.ReadSeeker
@@ -86,8 +89,7 @@ func (o oggParser) DiscNumber() int {
 
 // Duration returns the time duration for this stream
 func (o oggParser) Duration() time.Duration {
-	// TODO: calculate this using last granular position detected, or find a better method
-	return time.Duration(0 * time.Second)
+	return o.duration
 }
 
 // Encoder returns the encoder for this stream
@@ -149,8 +151,8 @@ func newOGGParser(reader io.ReadSeeker) (*oggParser, error) {
 		return nil, err
 	}
 
-	// Parse the required setup header
-	if err := parser.parseOGGSetupHeader(); err != nil {
+	// Parse the file's duration
+	if err := parser.parseOGGDuration(); err != nil {
 		return nil, err
 	}
 
@@ -420,20 +422,36 @@ func (o *oggParser) parseOGGCommentHeader() error {
 	return nil
 }
 
-// parseOGGSetupHeader parses the Vorbis setup header in an Ogg Vorbis file
-func (o *oggParser) parseOGGSetupHeader() error {
-	// Parse common header
-	headerType, err := o.parseOGGCommonHeader()
+// parseOGGDuration reads out the rest of the file to find the last OGG page header, which
+// contains information needed to parse the file duration
+func (o *oggParser) parseOGGDuration() error {
+	// Seek as far forward as sanely possible so we don't need to read tons of excess data
+	// For now, a value of 4096 bytes before the end appears to work, and should give a bit
+	// of wiggle-room without causing us to read the entire file
+	if _, err := o.reader.Seek(-4096, 2); err != nil {
+		return err
+	}
+
+	// Read the rest of the file to find the last page header
+	vorbisFile, err := ioutil.ReadAll(o.reader)
 	if err != nil {
 		return err
 	}
 
-	// Verify header type (5: Vorbis Setup)
-	if headerType != byte(5) {
+	// Find the index of the last OGG page header
+	index := bytes.LastIndex(vorbisFile, oggMagicNumber)
+	if index == -1 {
 		return ErrInvalidStream
 	}
 
-	// TODO: continue parsing here so we can eventually calculate duration
+	// Read using the in-memory bytes to grab the last page header information
+	o.reader = bytes.NewReader(vorbisFile[index:])
+	pageHeader, err := o.parseOGGPageHeader(false)
+	if err != nil {
+		return nil
+	}
 
+	// Calculate duration using last granule position divided by sample rate
+	o.duration = time.Duration(pageHeader.GranulePosition/uint64(o.idHeader.SampleRate)) * time.Second
 	return nil
 }

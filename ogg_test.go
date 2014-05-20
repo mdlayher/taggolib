@@ -67,7 +67,7 @@ func TestOGG(t *testing.T) {
 	}
 
 	// Duration
-	if int(ogg.Duration().Seconds()) != 0 {
+	if int(ogg.Duration().Seconds()) != 5 {
 		t.Fatalf("mismatched property Duration: %v", ogg.Duration().Seconds())
 	}
 

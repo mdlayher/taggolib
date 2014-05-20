@@ -13,7 +13,6 @@ Currently, taggolib supports the following formats, with some caveats:
 - MP3
   - ID3v2.4 tags only (ID3v2.3 in the works)
 - OGG
-  - Cannot calculate Duration as of now (returns "zero" duration)
 
 Example
 =======

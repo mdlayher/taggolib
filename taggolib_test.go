@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 		{mp3File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
 
 		// Check for OGG file, with hardcoded expected tags and properties
-		{oggFile, &oggParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{0, 192, 16, 44100}},
+		{oggFile, &oggParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 192, 16, 44100}},
 
 		// Check for an unknown format
 		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},
