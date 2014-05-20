@@ -22,7 +22,6 @@ var (
 // oggParser represents a OGG audio metadata tag parser
 type oggParser struct {
 	duration time.Duration
-	durChan  chan struct{}
 	encoder  string
 	idHeader *oggIDHeader
 	reader   io.ReadSeeker
