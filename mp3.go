@@ -232,14 +232,15 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			return err
 		}
 
-		// Stop parsing frames when frame title is nil
+		// Stop parsing frames when frame title is nil, because we have reached padding
 		if frameBuf[0] == byte(0) {
-			// Seek 8 bytes ahead to MP3 audio stream
-			if _, err := m.reader.Seek(8, 1); err != nil {
-				return err
-			}
+			break
+		}
 
-			// Break tag parsing loop
+		// If byte 255 discovered, we have reached the start of the MP3 header
+		if frameBuf[0] == byte(255) {
+			// Pre-seed the current data as a bytes reader, to parse MP3 header
+			m.reader = bytes.NewReader(frameBuf)
 			break
 		}
 
@@ -269,9 +270,12 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			return err
 		}
 
-		// Map frame title to tag title, store frame data, stripping UTF-8 BOM
+		// Trim leading bytes such as UTF-8 BOM, trim trailing nil
 		// TODO: handle encodings that aren't UTF-8, stored in tagBuf[0]
-		tagMap[mp3ID3v2FrameToTag[string(frameBuf)]] = string(tagBuf[1:n])
+		tag := string(bytes.TrimSuffix(tagBuf[1:n], []byte{0}))
+
+		// Map frame title to tag title, store frame data
+		tagMap[mp3ID3v2FrameToTag[string(frameBuf)]] = tag
 	}
 
 	// Store tags in parser
@@ -315,13 +319,35 @@ type mp3ID3v2ExtendedHeader struct {
 
 // parseMP3Header parses the MP3 header after the ID3 headers in a MP3 stream
 func (m *mp3Parser) parseMP3Header() error {
+	// Read buffers continuously until we reach end of padding section, and find the
+	// MP3 header, which starts with byte 255
+	headerBuf := make([]byte, 128)
+	for {
+		if _, err := m.reader.Read(headerBuf); err != nil {
+			return err
+		}
+
+		// If first byte is 255, value was pre-seeded by tag parser
+		if headerBuf[0] == byte(255) {
+			break
+		}
+
+		// Search for byte 255
+		index := bytes.Index(headerBuf, []byte{255})
+		if index != -1 {
+			// We have encountered the header, re-slice forward to its index
+			headerBuf = headerBuf[index:]
+			break
+		}
+	}
+
 	// Create and use a bit reader to parse the following fields
 	//  11 - MP3 frame sync (all bits set)
 	//   2 - MPEG audio version ID
 	//   2 - Layer description
 	//   1 - Protection bit (boolean)
 	//   4 - Bitrate index
-	fields, err := bit.NewReader(m.reader).ReadFields(11, 2, 2, 1, 4, 2, 1, 1, 2)
+	fields, err := bit.NewReader(bytes.NewReader(headerBuf)).ReadFields(11, 2, 2, 1, 4, 2, 1, 1, 2)
 	if err != nil {
 		return err
 	}
