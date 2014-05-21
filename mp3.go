@@ -192,6 +192,11 @@ func (m *mp3Parser) parseID3v2Header() error {
 		return ErrUnsupportedVersion
 	}
 
+	// Unsychronization is currently not supported
+	if m.id3Header.Unsynchronization {
+		return ErrUnsupportedVersion
+	}
+
 	// Ensure Footer boolean is not defined prior to ID3v2.4
 	if m.id3Header.MajorVersion < 4 && m.id3Header.Footer {
 		return ErrInvalidStream
@@ -223,7 +228,7 @@ func (m *mp3Parser) parseID3v2Frames() error {
 	// Create buffers for frame information
 	frameBuf := make([]byte, 4)
 	var frameLength uint32
-	tagBuf := make([]byte, 128)
+	tagBuf := make([]byte, 2048)
 
 	// Byte slices which should be trimmed and discarded from prefix or suffix
 	trimPrefix := []byte{255, 254}
