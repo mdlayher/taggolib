@@ -19,7 +19,7 @@ Example
 
 taggolib has a very simple interface, and many tags can be accessed by simply calling an appropriately-named
 method with no parameters.  Below is an example script called `taggo`, which can also be found in this repository
-at [taggo/taggo.go](https://github.com/mdlayher/taggolib/tree/master/taggo/). `taggo` will perform a recursive
+at [taggo/taggo.go](https://github.com/mdlayher/taggolib/blob/master/taggo/taggo.go). `taggo` will perform a recursive
 walk on a specified parameter directory, and print out information about any media files it recognizes.
 
 ```
