@@ -96,9 +96,9 @@ func (o oggVorbisParser) Encoder() string {
 	return o.encoder
 }
 
-// Format returns the name of the OGGVorbis format
+// Format returns the name of the Ogg Vorbis format
 func (o oggVorbisParser) Format() string {
-	return "OGGVorbis"
+	return "Ogg Vorbis"
 }
 
 // Genre returns the Genre tag for this stream
@@ -421,7 +421,7 @@ func (o *oggVorbisParser) parseOGGVorbisCommentHeader() error {
 	return nil
 }
 
-// parseOGGVorbisDuration reads out the rest of the file to find the last OGGVorbis page header, which
+// parseOGGVorbisDuration reads out the rest of the file to find the last Ogg Vorbis page header, which
 // contains information needed to parse the file duration
 func (o *oggVorbisParser) parseOGGVorbisDuration() error {
 	// Seek as far forward as sanely possible so we don't need to read tons of excess data
