@@ -18,10 +18,18 @@ var (
 
 		return file
 	}()
-	mp3File = func() []byte {
-		file, err := ioutil.ReadFile("./test/tone16bit.mp3")
+	mp3ID3v23File = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit_id3v2.3.mp3")
 		if err != nil {
-			log.Fatalf("Could not open test MP3: %v", err)
+			log.Fatalf("Could not open test MP3 + ID3v2.3: %v", err)
+		}
+
+		return file
+	}()
+	mp3ID3v24File = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit_id3v2.4.mp3")
+		if err != nil {
+			log.Fatalf("Could not open test MP3 + ID3v2.4: %v", err)
 		}
 
 		return file
@@ -29,7 +37,7 @@ var (
 	oggVorbisFile = func() []byte {
 		file, err := ioutil.ReadFile("./test/tone16bit.ogg")
 		if err != nil {
-			log.Fatalf("Could not open test OGG: %v", err)
+			log.Fatalf("Could not open test Ogg Vorbis: %v", err)
 		}
 
 		return file
@@ -50,8 +58,11 @@ func TestNew(t *testing.T) {
 		// Check for FLAC file, with hardcoded expected tags and properties
 		{flacFile, &flacParser{}, nil, "reference libFLAC 1.1.4 20070213", []string{"Artist", "Album", "Title"}, []int{5, 202, 16, 44100}},
 
-		// Check for MP3 file, with hardcoded expected tags and properties
-		{mp3File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
+		// Check for MP3 + ID3v2.3 file, with hardcoded expected tags and properties
+		{mp3ID3v23File, &mp3Parser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 32, 16, 44100}},
+
+		// Check for MP3 + ID3v2.4 file, with hardcoded expected tags and properties
+		{mp3ID3v24File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
 
 		// Check for Ogg Vorbis file, with hardcoded expected tags and properties
 		{oggVorbisFile, &oggVorbisParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 192, 16, 44100}},
@@ -139,10 +150,17 @@ func BenchmarkNewFLAC(b *testing.B) {
 	}
 }
 
-// BenchmarkNewMP3 checks the performance of the New() function with a MP3 file
-func BenchmarkNewMP3(b *testing.B) {
+// BenchmarkNewMP3ID3v23 checks the performance of the New() function with a MP3 + ID3v2.3 file
+func BenchmarkNewMP3ID3v23(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		New(bytes.NewReader(mp3File))
+		New(bytes.NewReader(mp3ID3v23File))
+	}
+}
+
+// BenchmarkNewMP3ID3v24 checks the performance of the New() function with a MP3 + ID3v2.4 file
+func BenchmarkNewMP3ID3v24(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(bytes.NewReader(mp3ID3v24File))
 	}
 }
 

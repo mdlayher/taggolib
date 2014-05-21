@@ -8,115 +8,123 @@ import (
 
 // TestMP3 verifies that all mp3Parser methods work properly
 func TestMP3(t *testing.T) {
-	// Generate a mp3Parser
-	mp3, err := New(bytes.NewReader(mp3File))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	// Slices of values which differ between MP3 variants
+	bitrates := []int{32, 320}
+	dates := []string{"", "2014-01-01"}
+	encoders := []string{"Lavf53.21.1", "MP3FS"}
 
-	// Verify that we actually got a MP3 mp3
-	if reflect.TypeOf(mp3) != reflect.TypeOf(&mp3Parser{}) {
-		t.Fatalf("unexpected mp3 type: %v", reflect.TypeOf(mp3))
-	}
+	// Check all available variants of MP3
+	for i, mp3File := range [][]byte{mp3ID3v23File, mp3ID3v24File} {
+		// Generate a mp3Parser
+		mp3, err := New(bytes.NewReader(mp3File))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-	// Verify all exported methods work properly
+		// Verify that we actually got a MP3 mp3
+		if reflect.TypeOf(mp3) != reflect.TypeOf(&mp3Parser{}) {
+			t.Fatalf("unexpected mp3 type: %v", reflect.TypeOf(mp3))
+		}
 
-	// Album
-	if mp3.Album() != "Album" {
-		t.Fatalf("mismatched tag Album: %v", mp3.Album())
-	}
+		// Verify all exported methods work properly
 
-	// AlbumArtist
-	if mp3.AlbumArtist() != "AlbumArtist" {
-		t.Fatalf("mismatched tag AlbumArtist: %v", mp3.AlbumArtist())
-	}
+		// Album
+		if mp3.Album() != "Album" {
+			t.Fatalf("mismatched tag Album: %v", mp3.Album())
+		}
 
-	// Artist
-	if mp3.Artist() != "Artist" {
-		t.Fatalf("mismatched tag Artist: %v", mp3.Artist())
-	}
+		// AlbumArtist
+		if mp3.AlbumArtist() != "AlbumArtist" {
+			t.Fatalf("mismatched tag AlbumArtist: %v", mp3.AlbumArtist())
+		}
 
-	// BitDepth
-	if mp3.BitDepth() != 16 {
-		t.Fatalf("mismatched property BitDepth: %v", mp3.BitDepth())
-	}
+		// Artist
+		if mp3.Artist() != "Artist" {
+			t.Fatalf("mismatched tag Artist: %v", mp3.Artist())
+		}
 
-	// Bitrate
-	if mp3.Bitrate() != 320 {
-		t.Fatalf("mismatched property Bitrate: %v", mp3.Bitrate())
-	}
+		// BitDepth
+		if mp3.BitDepth() != 16 {
+			t.Fatalf("mismatched property BitDepth: %v", mp3.BitDepth())
+		}
 
-	// Channels
-	if mp3.Channels() != 2 {
-		t.Fatalf("mismatched property Channels: %v", mp3.Channels())
-	}
+		// Bitrate
+		if mp3.Bitrate() != bitrates[i] {
+			t.Fatalf("mismatched property Bitrate: %v", mp3.Bitrate())
+		}
 
-	// Comment
-	if mp3.Comment() != "" {
-		t.Fatalf("mismatched tag Comment: %v", mp3.Comment())
-	}
+		// Channels
+		if mp3.Channels() != 2 {
+			t.Fatalf("mismatched property Channels: %v", mp3.Channels())
+		}
 
-	// Date
-	if mp3.Date() != "2014-01-01" {
-		t.Fatalf("mismatched tag Date: %v", mp3.Date())
-	}
+		// Comment
+		if mp3.Comment() != "" {
+			t.Fatalf("mismatched tag Comment: %v", mp3.Comment())
+		}
 
-	// DiscNumber
-	if mp3.DiscNumber() != 1 {
-		t.Fatalf("mismatched tag DiscNumber: %v", mp3.DiscNumber())
-	}
+		// Date
+		if mp3.Date() != dates[i] {
+			t.Fatalf("mismatched tag Date: %v", mp3.Date())
+		}
 
-	// Duration
-	if int(mp3.Duration().Seconds()) != 5 {
-		t.Fatalf("mismatched property Duration: %v", mp3.Duration().Seconds())
-	}
+		// DiscNumber
+		if mp3.DiscNumber() != 1 {
+			t.Fatalf("mismatched tag DiscNumber: %v", mp3.DiscNumber())
+		}
 
-	// Encoder
-	if mp3.Encoder() != "MP3FS" {
-		t.Fatalf("mismatched property Encoder: %v", mp3.Encoder())
-	}
+		// Duration
+		if int(mp3.Duration().Seconds()) != 5 {
+			t.Fatalf("mismatched property Duration: %v", mp3.Duration().Seconds())
+		}
 
-	// Format
-	if mp3.Format() != "MP3" {
-		t.Fatalf("mismatched property Format: %v", mp3.Format())
-	}
+		// Encoder
+		if mp3.Encoder() != encoders[i] {
+			t.Fatalf("mismatched property Encoder: %v", mp3.Encoder())
+		}
 
-	// Genre
-	if mp3.Genre() != "Genre" {
-		t.Fatalf("mismatched tag Genre: %v", mp3.Genre())
-	}
+		// Format
+		if mp3.Format() != "MP3" {
+			t.Fatalf("mismatched property Format: %v", mp3.Format())
+		}
 
-	// SampleRate
-	if mp3.SampleRate() != 44100 {
-		t.Fatalf("mismatched property SampleRate: %v", mp3.SampleRate())
-	}
+		// Genre
+		if mp3.Genre() != "Genre" {
+			t.Fatalf("mismatched tag Genre: %v", mp3.Genre())
+		}
 
-	// Title
-	if mp3.Title() != "Title" {
-		t.Fatalf("mismatched tag Title: %v", mp3.Title())
-	}
+		// SampleRate
+		if mp3.SampleRate() != 44100 {
+			t.Fatalf("mismatched property SampleRate: %v", mp3.SampleRate())
+		}
 
-	// TrackNumber
-	if mp3.TrackNumber() != 1 {
-		t.Fatalf("mismatched tag TrackNumber: %v", mp3.TrackNumber())
-	}
+		// Title
+		if mp3.Title() != "Title" {
+			t.Fatalf("mismatched tag Title: %v", mp3.Title())
+		}
 
-	// Check a few raw tags
+		// TrackNumber
+		if mp3.TrackNumber() != 1 {
+			t.Fatalf("mismatched tag TrackNumber: %v", mp3.TrackNumber())
+		}
 
-	if mp3.Tag("ARTIST") != "Artist" {
-		t.Fatalf("unexpected raw tag ARTIST: %v", mp3.Tag("ARTIST"))
-	}
+		// Check a few raw tags
 
-	if mp3.Tag("ALBUM") != "Album" {
-		t.Fatalf("unexpected raw tag ALBUM: %v", mp3.Tag("ALBUM"))
-	}
+		if mp3.Tag("ARTIST") != "Artist" {
+			t.Fatalf("unexpected raw tag ARTIST: %v", mp3.Tag("ARTIST"))
+		}
 
-	if mp3.Tag("TITLE") != "Title" {
-		t.Fatalf("unexpected raw tag TITLE: %v", mp3.Tag("TITLE"))
-	}
+		if mp3.Tag("ALBUM") != "Album" {
+			t.Fatalf("unexpected raw tag ALBUM: %v", mp3.Tag("ALBUM"))
+		}
 
-	// Check a non-existant tag
-	if mp3.Tag("NOTEXISTS") != "" {
-		t.Fatalf("unexpected raw tag NOTEXISTS: %v", mp3.Tag("NOTEXISTS"))
+		if mp3.Tag("TITLE") != "Title" {
+			t.Fatalf("unexpected raw tag TITLE: %v", mp3.Tag("TITLE"))
+		}
+
+		// Check a non-existant tag
+		if mp3.Tag("NOTEXISTS") != "" {
+			t.Fatalf("unexpected raw tag NOTEXISTS: %v", mp3.Tag("NOTEXISTS"))
+		}
 	}
 }

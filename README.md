@@ -11,7 +11,6 @@ Currently, taggolib supports the following formats, with some caveats:
 
 - FLAC
 - MP3
-  - ID3v2.4 tags only (ID3v2.3 in the works)
 - Ogg Vorbis
 
 Example
