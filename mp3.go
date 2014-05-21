@@ -225,6 +225,10 @@ func (m *mp3Parser) parseID3v2Frames() error {
 	var frameLength uint32
 	tagBuf := make([]byte, 128)
 
+	// Byte slices which should be trimmed and discarded from prefix or suffix
+	trimPrefix := []byte{255, 254}
+	trimSuffix := []byte{0}
+
 	// Continuously loop and parse frames
 	for {
 		// Parse a frame title
@@ -270,9 +274,9 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			return err
 		}
 
-		// Trim leading bytes such as UTF-8 BOM, trim trailing nil
+		// Trim leading bytes such as UTF-8 BOM, garbage bytes, trim trailing nil
 		// TODO: handle encodings that aren't UTF-8, stored in tagBuf[0]
-		tag := string(bytes.TrimSuffix(tagBuf[1:n], []byte{0}))
+		tag := string(bytes.TrimPrefix(bytes.TrimSuffix(tagBuf[1:n], trimSuffix), trimPrefix))
 
 		// Map frame title to tag title, store frame data
 		tagMap[mp3ID3v2FrameToTag[string(frameBuf)]] = tag
