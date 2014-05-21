@@ -46,6 +46,12 @@ func main() {
 		return
 	}
 
+	// Verify path actually exists
+	if _, err := os.Stat(os.Args[1]); err != nil {
+		fmt.Println("taggo:", err)
+		return
+	}
+
 	// Invoke a recursive file walk
 	err := filepath.Walk(os.Args[1], func(path string, info os.FileInfo, err error) error {
 		// Skip directories
