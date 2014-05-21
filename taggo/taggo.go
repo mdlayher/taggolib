@@ -38,8 +38,14 @@ func main() {
 		// Load file using taggolib
 		audio, err := taggolib.New(file)
 		if err != nil {
-			// Check fur unknown format or unsupported version, skip these
+			// Check for unknown format or unsupported version, skip these
 			if err == taggolib.ErrUnknownFormat || err == taggolib.ErrUnsupportedVersion {
+				return nil
+			}
+
+			// Check for invalid input stream
+			if err == taggolib.ErrInvalidStream {
+				fmt.Println("taggo: invalid input stream:", path)
 				return nil
 			}
 
