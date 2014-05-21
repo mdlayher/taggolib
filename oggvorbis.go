@@ -13,17 +13,17 @@ import (
 )
 
 var (
-	// oggMagicNumber is the magic number used to identify a OGG audio stream
+	// oggMagicNumber is the magic number used to identify an OGG container audio stream
 	oggMagicNumber = []byte("OggS")
-	// oggVorbisWord is used to denote the beginning of a Vorbis information block
-	oggVorbisWord = []byte("vorbis")
+	// oggVorbisVorbisWord is used to denote the beginning of a Vorbis information block
+	oggVorbisVorbisWord = []byte("vorbis")
 )
 
-// oggParser represents a OGG audio metadata tag parser
-type oggParser struct {
+// oggVorbisParser represents a OGGVorbis audio metadata tag parser
+type oggVorbisParser struct {
 	duration time.Duration
 	encoder  string
-	idHeader *oggIDHeader
+	idHeader *oggVorbisIDHeader
 	reader   io.ReadSeeker
 	tags     map[string]string
 
@@ -35,49 +35,49 @@ type oggParser struct {
 }
 
 // Album returns the Album tag for this stream
-func (o oggParser) Album() string {
+func (o oggVorbisParser) Album() string {
 	return o.tags[tagAlbum]
 }
 
 // AlbumArtist returns the AlbumArtist tag for this stream
-func (o oggParser) AlbumArtist() string {
+func (o oggVorbisParser) AlbumArtist() string {
 	return o.tags[tagAlbumArtist]
 }
 
 // Artist returns the Artist tag for this stream
-func (o oggParser) Artist() string {
+func (o oggVorbisParser) Artist() string {
 	return o.tags[tagArtist]
 }
 
 // BitDepth returns the bits-per-sample of this stream
-func (o oggParser) BitDepth() int {
+func (o oggVorbisParser) BitDepth() int {
 	// Ogg Vorbis should always provide 16 bit depth
 	return 16
 }
 
 // Bitrate calculates the audio bitrate for this stream
-func (o oggParser) Bitrate() int {
+func (o oggVorbisParser) Bitrate() int {
 	// TODO: see how max/min bitrate play into calculations
 	return int(o.idHeader.NomBitrate) / 1000
 }
 
 // Channels returns the number of channels for this stream
-func (o oggParser) Channels() int {
+func (o oggVorbisParser) Channels() int {
 	return int(o.idHeader.ChannelCount)
 }
 
 // Comment returns the Comment tag for this stream
-func (o oggParser) Comment() string {
+func (o oggVorbisParser) Comment() string {
 	return o.tags[tagComment]
 }
 
 // Date returns the Date tag for this stream
-func (o oggParser) Date() string {
+func (o oggVorbisParser) Date() string {
 	return o.tags[tagDate]
 }
 
 // DiscNumber returns the DiscNumber tag for this stream
-func (o oggParser) DiscNumber() int {
+func (o oggVorbisParser) DiscNumber() int {
 	disc, err := strconv.Atoi(o.tags[tagDiscNumber])
 	if err != nil {
 		return 0
@@ -87,42 +87,42 @@ func (o oggParser) DiscNumber() int {
 }
 
 // Duration returns the time duration for this stream
-func (o oggParser) Duration() time.Duration {
+func (o oggVorbisParser) Duration() time.Duration {
 	return o.duration
 }
 
 // Encoder returns the encoder for this stream
-func (o oggParser) Encoder() string {
+func (o oggVorbisParser) Encoder() string {
 	return o.encoder
 }
 
-// Format returns the name of the OGG format
-func (o oggParser) Format() string {
-	return "OGG"
+// Format returns the name of the OGGVorbis format
+func (o oggVorbisParser) Format() string {
+	return "OGGVorbis"
 }
 
 // Genre returns the Genre tag for this stream
-func (o oggParser) Genre() string {
+func (o oggVorbisParser) Genre() string {
 	return o.tags[tagGenre]
 }
 
 // SampleRate returns the sample rate in Hertz for this stream
-func (o oggParser) SampleRate() int {
+func (o oggVorbisParser) SampleRate() int {
 	return int(o.idHeader.SampleRate)
 }
 
 // Tag attempts to return the raw, unprocessed tag with the specified name for this stream
-func (o oggParser) Tag(name string) string {
+func (o oggVorbisParser) Tag(name string) string {
 	return o.tags[name]
 }
 
 // Title returns the Title tag for this stream
-func (o oggParser) Title() string {
+func (o oggVorbisParser) Title() string {
 	return o.tags[tagTitle]
 }
 
 // TrackNumber returns the TrackNumber tag for this stream
-func (o oggParser) TrackNumber() int {
+func (o oggVorbisParser) TrackNumber() int {
 	// Check for a /, such as 2/8
 	track, err := strconv.Atoi(strings.Split(o.tags[tagTrackNumber], "/")[0])
 	if err != nil {
@@ -132,26 +132,26 @@ func (o oggParser) TrackNumber() int {
 	return track
 }
 
-// newOGGParser creates a parser for OGG audio streams
-func newOGGParser(reader io.ReadSeeker) (*oggParser, error) {
-	// Create OGG parser
-	parser := &oggParser{
+// newOGGVorbisParser creates a parser for OGGVorbis audio streams
+func newOGGVorbisParser(reader io.ReadSeeker) (*oggVorbisParser, error) {
+	// Create OGGVorbis parser
+	parser := &oggVorbisParser{
 		buffer: make([]byte, 128),
 		reader: reader,
 	}
 
 	// Parse the required ID header
-	if err := parser.parseOGGIDHeader(); err != nil {
+	if err := parser.parseOGGVorbisIDHeader(); err != nil {
 		return nil, err
 	}
 
 	// Parse the required comment header
-	if err := parser.parseOGGCommentHeader(); err != nil {
+	if err := parser.parseOGGVorbisCommentHeader(); err != nil {
 		return nil, err
 	}
 
 	// Parse the file's duration
-	if err := parser.parseOGGDuration(); err != nil {
+	if err := parser.parseOGGVorbisDuration(); err != nil {
 		return nil, err
 	}
 
@@ -159,8 +159,8 @@ func newOGGParser(reader io.ReadSeeker) (*oggParser, error) {
 	return parser, nil
 }
 
-// oggPageHeader represents the information contained in an Ogg Page header
-type oggPageHeader struct {
+// oggVorbisPageHeader represents the information contained in an Ogg Page header
+type oggVorbisPageHeader struct {
 	CapturePattern  []byte
 	Version         uint8
 	HeaderType      uint8
@@ -171,10 +171,10 @@ type oggPageHeader struct {
 	PageSegments    uint8
 }
 
-// parseOGGPageHeader parses an Ogg page header
-func (o *oggParser) parseOGGPageHeader(skipMagicNumber bool) (*oggPageHeader, error) {
+// parseOGGVorbisPageHeader parses an Ogg page header
+func (o *oggVorbisParser) parseOGGVorbisPageHeader(skipMagicNumber bool) (*oggVorbisPageHeader, error) {
 	// Create page header
-	pageHeader := new(oggPageHeader)
+	pageHeader := new(oggVorbisPageHeader)
 
 	// Unless skip is specified, check for capture pattern
 	if !skipMagicNumber {
@@ -248,8 +248,8 @@ func (o *oggParser) parseOGGPageHeader(skipMagicNumber bool) (*oggPageHeader, er
 	return pageHeader, nil
 }
 
-// parseOGGCommonHeader parses information common to all Ogg Vorbis headers
-func (o *oggParser) parseOGGCommonHeader() (byte, error) {
+// parseOGGVorbisCommonHeader parses information common to all Ogg Vorbis headers
+func (o *oggVorbisParser) parseOGGVorbisCommonHeader() (byte, error) {
 	// Read the first byte to get header type
 	if _, err := o.reader.Read(o.buffer[:1]); err != nil {
 		return 0, err
@@ -259,12 +259,12 @@ func (o *oggParser) parseOGGCommonHeader() (byte, error) {
 	o.buffer[len(o.buffer)-1] = o.buffer[0]
 
 	// Read for 'vorbis' identification word
-	if _, err := o.reader.Read(o.buffer[:len(oggVorbisWord)]); err != nil {
+	if _, err := o.reader.Read(o.buffer[:len(oggVorbisVorbisWord)]); err != nil {
 		return 0, err
 	}
 
 	// Ensure 'vorbis' identification word is present
-	if !bytes.Equal(o.buffer[:len(oggVorbisWord)], oggVorbisWord) {
+	if !bytes.Equal(o.buffer[:len(oggVorbisVorbisWord)], oggVorbisVorbisWord) {
 		return 0, ErrInvalidStream
 	}
 
@@ -272,8 +272,8 @@ func (o *oggParser) parseOGGCommonHeader() (byte, error) {
 	return o.buffer[len(o.buffer)-1], nil
 }
 
-// oggIDHeader represents the information contained in an Ogg Vorbis identification header
-type oggIDHeader struct {
+// oggVorbisIDHeader represents the information contained in an Ogg Vorbis identification header
+type oggVorbisIDHeader struct {
 	VorbisVersion uint32
 	ChannelCount  uint8
 	SampleRate    uint32
@@ -285,16 +285,16 @@ type oggIDHeader struct {
 	Framing       bool
 }
 
-// parseOGGIDHeader parses the required identification header for an Ogg Vorbis stream
-func (o *oggParser) parseOGGIDHeader() error {
-	// Read OGG page header, skipping the capture pattern because New() already verified
+// parseOGGVorbisIDHeader parses the required identification header for an Ogg Vorbis stream
+func (o *oggVorbisParser) parseOGGVorbisIDHeader() error {
+	// Read OGGVorbis page header, skipping the capture pattern because New() already verified
 	// the magic number for us
-	if _, err := o.parseOGGPageHeader(true); err != nil {
+	if _, err := o.parseOGGVorbisPageHeader(true); err != nil {
 		return err
 	}
 
 	// Check for valid common header
-	headerType, err := o.parseOGGCommonHeader()
+	headerType, err := o.parseOGGVorbisCommonHeader()
 	if err != nil {
 		return err
 	}
@@ -305,7 +305,7 @@ func (o *oggParser) parseOGGIDHeader() error {
 	}
 
 	// Read fields found in identification header
-	header := new(oggIDHeader)
+	header := new(oggVorbisIDHeader)
 
 	// Vorbis version
 	if err := binary.Read(o.reader, binary.LittleEndian, &o.ui32); err != nil {
@@ -357,15 +357,15 @@ func (o *oggParser) parseOGGIDHeader() error {
 	return nil
 }
 
-// parseOGGCommentHeader parses the Vorbis Comment tags in an Ogg Vorbis file
-func (o *oggParser) parseOGGCommentHeader() error {
-	// Read OGG page header, specifying false to check the capture pattern
-	if _, err := o.parseOGGPageHeader(false); err != nil {
+// parseOGGVorbisCommentHeader parses the Vorbis Comment tags in an Ogg Vorbis file
+func (o *oggVorbisParser) parseOGGVorbisCommentHeader() error {
+	// Read OGGVorbis page header, specifying false to check the capture pattern
+	if _, err := o.parseOGGVorbisPageHeader(false); err != nil {
 		return err
 	}
 
 	// Parse common header
-	headerType, err := o.parseOGGCommonHeader()
+	headerType, err := o.parseOGGVorbisCommonHeader()
 	if err != nil {
 		return err
 	}
@@ -421,9 +421,9 @@ func (o *oggParser) parseOGGCommentHeader() error {
 	return nil
 }
 
-// parseOGGDuration reads out the rest of the file to find the last OGG page header, which
+// parseOGGVorbisDuration reads out the rest of the file to find the last OGGVorbis page header, which
 // contains information needed to parse the file duration
-func (o *oggParser) parseOGGDuration() error {
+func (o *oggVorbisParser) parseOGGVorbisDuration() error {
 	// Seek as far forward as sanely possible so we don't need to read tons of excess data
 	// For now, a value of 4096 bytes before the end appears to work, and should give a bit
 	// of wiggle-room without causing us to read the entire file
@@ -437,7 +437,7 @@ func (o *oggParser) parseOGGDuration() error {
 		return err
 	}
 
-	// Find the index of the last OGG page header
+	// Find the index of the last OGGVorbis page header
 	index := bytes.LastIndex(vorbisFile, oggMagicNumber)
 	if index == -1 {
 		return ErrInvalidStream
@@ -445,7 +445,7 @@ func (o *oggParser) parseOGGDuration() error {
 
 	// Read using the in-memory bytes to grab the last page header information
 	o.reader = bytes.NewReader(vorbisFile[index:])
-	pageHeader, err := o.parseOGGPageHeader(false)
+	pageHeader, err := o.parseOGGVorbisPageHeader(false)
 	if err != nil {
 		return nil
 	}

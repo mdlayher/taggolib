@@ -6,17 +6,17 @@ import (
 	"testing"
 )
 
-// TestOGG verifies that all oggParser methods work properly
-func TestOGG(t *testing.T) {
+// TestOGGVorbis verifies that all oggParser methods work properly
+func TestOGGVorbis(t *testing.T) {
 	// Generate a oggParser
-	ogg, err := New(bytes.NewReader(oggFile))
+	ogg, err := New(bytes.NewReader(oggVorbisFile))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Verify that we actually got a OGG ogg
-	if reflect.TypeOf(ogg) != reflect.TypeOf(&oggParser{}) {
-		t.Fatalf("unexpected ogg type: %v", reflect.TypeOf(ogg))
+	// Verify that we actually got a Ogg Vorbis parser
+	if reflect.TypeOf(ogg) != reflect.TypeOf(&oggVorbisParser{}) {
+		t.Fatalf("unexpected Ogg Vorbis type: %v", reflect.TypeOf(ogg))
 	}
 
 	// Verify all exported methods work properly
@@ -77,7 +77,7 @@ func TestOGG(t *testing.T) {
 	}
 
 	// Format
-	if ogg.Format() != "OGG" {
+	if ogg.Format() != "OGGVorbis" {
 		t.Fatalf("mismatched property Format: %v", ogg.Format())
 	}
 

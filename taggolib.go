@@ -96,7 +96,7 @@ func New(reader io.ReadSeeker) (Parser, error) {
 
 		// Verify OGG magic number
 		if bytes.Equal(magicBuf[:len(oggMagicNumber)], oggMagicNumber) {
-			return newOGGParser(reader)
+			return newOGGVorbisParser(reader)
 		}
 	}
 
