@@ -77,7 +77,7 @@ func TestOGGVorbis(t *testing.T) {
 	}
 
 	// Format
-	if ogg.Format() != "OGGVorbis" {
+	if ogg.Format() != "Ogg Vorbis" {
 		t.Fatalf("mismatched property Format: %v", ogg.Format())
 	}
 
