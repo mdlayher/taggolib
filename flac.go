@@ -276,9 +276,22 @@ func (f *flacParser) parseProperties() error {
 		return err
 	}
 
-	// Ensure not last field, and that the metadata block type is STREAMINFO
-	if header.LastBlock || header.BlockType != flacStreamInfo {
-		return ErrInvalidStream
+	// Ensure that the metadata block type is STREAMINFO
+	if header.BlockType != flacStreamInfo {
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  f.Format(),
+			Details: "first metadata block is not type STREAMINFO",
+		}
+	}
+
+	// Ensure that STREAMINFO is not the last block
+	if header.LastBlock {
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  f.Format(),
+			Details: "STREAMINFO block is marked as last metadata block in stream",
+		}
 	}
 
 	// Seek forward past frame information, to sample rate
@@ -298,7 +311,7 @@ func (f *flacParser) parseProperties() error {
 
 	// Read the MD5 checksum of the stream
 	if _, err := f.reader.Read(f.buffer[:16]); err != nil {
-		return ErrInvalidStream
+		return err
 	}
 
 	// Store properties

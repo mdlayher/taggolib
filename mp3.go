@@ -3,6 +3,7 @@ package taggolib
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -189,17 +190,29 @@ func (m *mp3Parser) parseID3v2Header() error {
 
 	// Ensure ID3v2 version is supported
 	if m.id3Header.MajorVersion != 3 && m.id3Header.MajorVersion != 4 {
-		return ErrUnsupportedVersion
+		return TagError{
+			Err:     errUnsupportedVersion,
+			Format:  m.Format(),
+			Details: fmt.Sprintf("unsupported ID3 version: ID3v2.%d.%d", m.id3Header.MajorVersion, m.id3Header.MinorVersion),
+		}
 	}
 
 	// Unsychronization is currently not supported
 	if m.id3Header.Unsynchronization {
-		return ErrUnsupportedVersion
+		return TagError{
+			Err:     errUnsupportedVersion,
+			Format:  m.Format(),
+			Details: "ID3 unsynchronization is not supported",
+		}
 	}
 
 	// Ensure Footer boolean is not defined prior to ID3v2.4
 	if m.id3Header.MajorVersion < 4 && m.id3Header.Footer {
-		return ErrInvalidStream
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  m.Format(),
+			Details: "ID3 footer bit set prior to version ID3v2.4",
+		}
 	}
 
 	// Check for extended header
@@ -377,8 +390,20 @@ func (m *mp3Parser) parseMP3Header() error {
 	// Note: this check is correct, as these values actually map to:
 	//   - Version ID 3 -> MPEG Version 1
 	//   - Layer ID 1 -> MPEG Layer 3
-	if m.mp3Header.MPEGVersionID != 3 || m.mp3Header.MPEGLayerID != 1 {
-		return ErrUnsupportedVersion
+	if m.mp3Header.MPEGVersionID != 3 {
+		return TagError{
+			Err:     errUnsupportedVersion,
+			Format:  m.Format(),
+			Details: fmt.Sprintf("unsupported MPEG version ID: %d", m.mp3Header.MPEGVersionID),
+		}
+	}
+
+	if m.mp3Header.MPEGLayerID != 1 {
+		return TagError{
+			Err:     errUnsupportedVersion,
+			Format:  m.Format(),
+			Details: fmt.Sprintf("unsupported MPEG layer ID: %d", m.mp3Header.MPEGLayerID),
+		}
 	}
 
 	return nil

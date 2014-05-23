@@ -3,6 +3,7 @@ package taggolib
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 )
@@ -21,14 +22,65 @@ const (
 )
 
 var (
-	// ErrInvalidStream is returned when taggolib encounters a broken input stream
-	ErrInvalidStream = errors.New("taggolib: invalid input stream")
-	// ErrUnknownFormat is returned when taggolib cannot recognize the input stream format
-	ErrUnknownFormat = errors.New("taggolib: unknown format")
-	// ErrUnsupportedVersion is returned when taggolib recognizes an input stream format, but
+	// errInvalidStream is returned when taggolib encounters a broken input stream, but
+	// does recognize the input stream format
+	errInvalidStream = errors.New("invalid input stream")
+	// errUnknownFormat is returned when taggolib cannot recognize the input stream format
+	errUnknownFormat = errors.New("unknown format")
+	// errUnsupportedVersion is returned when taggolib recognizes an input stream format, but
 	// can not currently handle the version specified by the input stream
-	ErrUnsupportedVersion = errors.New("taggolib: unsupported version")
+	errUnsupportedVersion = errors.New("unsupported version")
 )
+
+// TagError represents an error which occurs during the metadata parsing process
+type TagError struct {
+	Err     error
+	Format  string
+	Details string
+}
+
+// Error returns a detailed description of an error during the the metadata parsing process
+func (e TagError) Error() string {
+	return fmt.Sprintf("%s - %s: %s", e.Err.Error(), e.Format, e.Details)
+}
+
+// IsInvalidStream is a convenience method which checks if an error is caused by an invalid stream
+// of a known format
+func IsInvalidStream(err error) bool {
+	// Attempt to type-assert to TagError
+	tagErr, ok := err.(TagError)
+	if !ok {
+		return false
+	}
+
+	// Return if error matches errInvalidStream
+	return tagErr.Err == errInvalidStream
+}
+
+// IsUnknownFormat is a convenience method which checks if an error is caused by an unknown format
+func IsUnknownFormat(err error) bool {
+	// Attempt to type-assert to TagError
+	tagErr, ok := err.(TagError)
+	if !ok {
+		return false
+	}
+
+	// Return if error matches errUnknownFormat
+	return tagErr.Err == errUnknownFormat
+}
+
+// IsUnsupportedVersion is a convenience method which checks if an error is caused by an unsupported version
+// of a known format
+func IsUnsupportedVersion(err error) bool {
+	// Attempt to type-assert to TagError
+	tagErr, ok := err.(TagError)
+	if !ok {
+		return false
+	}
+
+	// Return if error matches errUnsupportedVersion
+	return tagErr.Err == errUnsupportedVersion
+}
 
 // Parser represents an audio metadata tag parser
 type Parser interface {
@@ -101,5 +153,9 @@ func New(reader io.ReadSeeker) (Parser, error) {
 	}
 
 	// Unrecognized magic number
-	return nil, ErrUnknownFormat
+	return nil, TagError{
+		Err:     errUnknownFormat,
+		Format:  "unknown",
+		Details: "unrecognized magic number, cannot parse this stream",
+	}
 }

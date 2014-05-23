@@ -68,7 +68,7 @@ func TestNew(t *testing.T) {
 		{oggVorbisFile, &oggVorbisParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 192, 16, 44100}},
 
 		// Check for an unknown format
-		{[]byte("nonsense"), nil, ErrUnknownFormat, "", nil, nil},
+		{[]byte("nonsense"), nil, errUnknownFormat, "", nil, nil},
 	}
 
 	// Iterate all tests
@@ -80,7 +80,7 @@ func TestNew(t *testing.T) {
 		parser, err := New(reader)
 		if err != nil {
 			// If an error occurred, check if it was expected
-			if err != test.err {
+			if test.err == errUnknownFormat && !IsUnknownFormat(err) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 		}

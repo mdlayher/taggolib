@@ -3,6 +3,7 @@ package taggolib
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strconv"
@@ -185,7 +186,11 @@ func (o *oggVorbisParser) parseOGGVorbisPageHeader(skipMagicNumber bool) (*oggVo
 
 		// Verify proper capture pattern
 		if !bytes.Equal(pageHeader.CapturePattern, oggMagicNumber) {
-			return nil, ErrInvalidStream
+			return nil, TagError{
+				Err:     errInvalidStream,
+				Format:  o.Format(),
+				Details: "unrecognized capture pattern in Ogg page header",
+			}
 		}
 	} else {
 		// If skipped, assume capture pattern is correct magic number
@@ -200,7 +205,11 @@ func (o *oggVorbisParser) parseOGGVorbisPageHeader(skipMagicNumber bool) (*oggVo
 
 	// Verify mandated version 0
 	if pageHeader.Version != 0 {
-		return nil, ErrInvalidStream
+		return nil, TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: fmt.Sprintf("Vorbis version must be 0, but found version %d", pageHeader.Version),
+		}
 	}
 
 	// Header type
@@ -265,7 +274,11 @@ func (o *oggVorbisParser) parseOGGVorbisCommonHeader() (byte, error) {
 
 	// Ensure 'vorbis' identification word is present
 	if !bytes.Equal(o.buffer[:len(oggVorbisVorbisWord)], oggVorbisVorbisWord) {
-		return 0, ErrInvalidStream
+		return 0, TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: "unrecognized identification word in header",
+		}
 	}
 
 	// Return header type from end of buffer
@@ -301,7 +314,11 @@ func (o *oggVorbisParser) parseOGGVorbisIDHeader() error {
 
 	// Ensure header type 1: identification header
 	if headerType != byte(1) {
-		return ErrInvalidStream
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: "invalid header type for identification header",
+		}
 	}
 
 	// Read fields found in identification header
@@ -315,7 +332,11 @@ func (o *oggVorbisParser) parseOGGVorbisIDHeader() error {
 
 	// Ensure Vorbis version is 0, per specification
 	if header.VorbisVersion != 0 {
-		return ErrInvalidStream
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: fmt.Sprintf("Vorbis version must be 0, but found version %d", header.VorbisVersion),
+		}
 	}
 
 	// Channel count
@@ -372,7 +393,11 @@ func (o *oggVorbisParser) parseOGGVorbisCommentHeader() error {
 
 	// Verify header type (3: Vorbis Comment)
 	if headerType != byte(3) {
-		return ErrInvalidStream
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: "invalid header type for Vorbis comment header",
+		}
 	}
 
 	// Read vendor length
@@ -440,7 +465,11 @@ func (o *oggVorbisParser) parseOGGVorbisDuration() error {
 	// Find the index of the last OGGVorbis page header
 	index := bytes.LastIndex(vorbisFile, oggMagicNumber)
 	if index == -1 {
-		return ErrInvalidStream
+		return TagError{
+			Err:     errInvalidStream,
+			Format:  o.Format(),
+			Details: "could not detect final Ogg page header",
+		}
 	}
 
 	// Read using the in-memory bytes to grab the last page header information
