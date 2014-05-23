@@ -7,7 +7,10 @@ taggolib is inspired by the [TagLib](http://taglib.github.io/) and [taglib-sharp
 projects.  Its goal is to provide read-only metadata access to a variety of audio formats in Go, without the need
 to use a TagLib binding.
 
-Currently, taggolib supports the following formats, with some caveats:
+taggolib is currently **unstable**, and features may change between versions.  Once a larger number of formats are
+supported and well-tested, a stable version will be released.
+
+Currently, taggolib supports the following formats:
 
 - FLAC
 - MP3
