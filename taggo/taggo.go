@@ -1,3 +1,5 @@
+// Command taggo is a simple audio tag parser, which is meant to demonstrate the functionality
+// of the taggolib package.
 package main
 
 import (
