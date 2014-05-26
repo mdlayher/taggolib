@@ -84,6 +84,7 @@ func (m mp3Parser) DiscNumber() int {
 }
 
 // Duration returns the time duration for this stream
+// BUG(mdlayher): if the LENGTH tag is not present, this will always return duration 0
 func (m mp3Parser) Duration() time.Duration {
 	// Parse length as integer
 	length, err := strconv.Atoi(m.tags[mp3TagLength])
