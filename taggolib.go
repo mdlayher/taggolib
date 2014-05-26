@@ -102,14 +102,16 @@ type Parser interface {
 	Title() string
 	TrackNumber() int
 
-	// Tag is a special method which will attempt to retrieve an audio metadata tag with the input name. Tag will
-	// attempt to return a metadata tag's raw contents, or will return an empty string on failure.
+	// Tag is a special method which will attempt to retrieve an audio metadata
+	// tag with the input name. Tag will attempt to return a metadata tag's raw
+	// contents, or will return an empty string on failure.
 	// Using Tag, the following two calls are functionally equivalent:
 	//   - parser.Artist()
 	//   - parser.Tag("ARTIST")
 	Tag(name string) string
 
-	// Methods which access properties of an audio file, which are typically calculated at runtime
+	// Methods which access properties of an audio file, which are
+	// typically calculated at runtime
 	BitDepth() int
 	Bitrate() int
 	Channels() int
