@@ -9,12 +9,12 @@ import (
 // TestMP3 verifies that all mp3Parser methods work properly
 func TestMP3(t *testing.T) {
 	// Slices of values which differ between MP3 variants
-	bitrates := []int{32, 320}
-	dates := []string{"", "2014-01-01"}
-	encoders := []string{"Lavf53.21.1", "MP3FS"}
+	bitrates := []int{32, 320, 88}
+	dates := []string{"", "2014-01-01", ""}
+	encoders := []string{"Lavf53.21.1", "MP3FS", "Lavf53.21.1"}
 
 	// Check all available variants of MP3
-	for i, mp3File := range [][]byte{mp3ID3v23File, mp3ID3v24File} {
+	for i, mp3File := range [][]byte{mp3ID3v23File, mp3ID3v24File, mp3VBRFile} {
 		// Generate a mp3Parser
 		mp3, err := New(bytes.NewReader(mp3File))
 		if err != nil {

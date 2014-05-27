@@ -36,6 +36,14 @@ var (
 
 		return file
 	}()
+	mp3VBRFile = func() []byte {
+		file, err := ioutil.ReadFile("./test/tone16bit_vbr.mp3")
+		if err != nil {
+			log.Fatalf("Could not open test MP3 VBR: %v", err)
+		}
+
+		return file
+	}()
 	oggVorbisFile = func() []byte {
 		file, err := ioutil.ReadFile("./test/tone16bit.ogg")
 		if err != nil {
@@ -89,6 +97,9 @@ func TestNew(t *testing.T) {
 
 		// Check for MP3 + ID3v2.4 file, with hardcoded expected tags and properties
 		{mp3ID3v24File, &mp3Parser{}, nil, "MP3FS", []string{"Artist", "Album", "Title"}, []int{5, 320, 16, 44100}},
+
+		// Check for MP3 VBR file, with hardcoded expected tags and properties
+		{mp3VBRFile, &mp3Parser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 88, 16, 44100}},
 
 		// Check for Ogg Vorbis file, with hardcoded expected tags and properties
 		{oggVorbisFile, &oggVorbisParser{}, nil, "Lavf53.21.1", []string{"Artist", "Album", "Title"}, []int{5, 192, 16, 44100}},
@@ -187,6 +198,13 @@ func BenchmarkNewMP3ID3v23(b *testing.B) {
 func BenchmarkNewMP3ID3v24(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		New(bytes.NewReader(mp3ID3v24File))
+	}
+}
+
+// BenchmarkNewMP3VBR checks the performance of the New() function with a MP3 VBR file
+func BenchmarkNewMP3VBR(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		New(bytes.NewReader(mp3VBRFile))
 	}
 }
 
