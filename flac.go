@@ -139,7 +139,7 @@ func (f flacParser) TrackNumber() int {
 func newFLACParser(reader io.ReadSeeker) (*flacParser, error) {
 	// Create FLAC parser
 	parser := &flacParser{
-		buffer: make([]byte, 128),
+		buffer: make([]byte, 256),
 		reader: reader,
 	}
 
