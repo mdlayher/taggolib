@@ -16,6 +16,9 @@ const (
 	// Tags specific to ID3v2 MP3
 	mp3TagEncoder = "ENCODER"
 	mp3TagLength  = "LENGTH"
+
+	// Samples per frame for MPEG1 Layer III
+	mp3SamplesPerFrame = 1152
 )
 
 var (
@@ -23,14 +26,19 @@ var (
 	mp3MagicNumber = []byte("ID3")
 	// mp3APICFrame is the name of the APIC, or attached picture ID3 frame
 	mp3APICFrame = []byte("APIC")
+	// mp3XingMarker is the bytes which identify a Xing VBR header
+	mp3XingMarker = []byte("Xing")
+	// mp3InfoMarker is the bytes which identify a Info VBR header
+	mp3InfoMarker = []byte("Info")
 )
 
 // mp3Parser represents a MP3 audio metadata tag parser
 type mp3Parser struct {
-	id3Header *mp3ID3v2Header
-	mp3Header *mp3Header
-	reader    io.ReadSeeker
-	tags      map[string]string
+	id3Header  *mp3ID3v2Header
+	mp3Header  *mp3Header
+	reader     io.ReadSeeker
+	tags       map[string]string
+	xingHeader *mp3XingHeader
 }
 
 // Album returns the Album tag for this stream
@@ -55,6 +63,12 @@ func (m mp3Parser) BitDepth() int {
 
 // Bitrate calculates the audio bitrate for this stream
 func (m mp3Parser) Bitrate() int {
+	// Check for a Xing header, meaning that the bitrate was calculated there
+	if m.xingHeader != nil && m.xingHeader.Bitrate > 0 {
+		return m.xingHeader.Bitrate
+	}
+
+	// Return bitrate from MP3 header
 	return mp3BitrateMap[m.mp3Header.Bitrate]
 }
 
@@ -84,9 +98,13 @@ func (m mp3Parser) DiscNumber() int {
 }
 
 // Duration returns the time duration for this stream
-// BUG(mdlayher): MP3: if the LENGTH tag is not present, Duration() will always return 0
 func (m mp3Parser) Duration() time.Duration {
-	// Parse length as integer
+	// Check for a Xing header, meaning that the duration was calculated there
+	if m.xingHeader != nil && m.xingHeader.Duration > 0 {
+		return time.Duration(m.xingHeader.Duration) * time.Second
+	}
+
+	// Parse length tag as integer
 	length, err := strconv.Atoi(m.tags[mp3TagLength])
 	if err != nil {
 		return time.Duration(0 * time.Second)
@@ -344,7 +362,7 @@ type mp3ID3v2ExtendedHeader struct {
 func (m *mp3Parser) parseMP3Header() error {
 	// Read buffers continuously until we reach end of padding section, and find the
 	// MP3 header, which starts with byte 255
-	headerBuf := make([]byte, 128)
+	headerBuf := make([]byte, 1024)
 	for {
 		if _, err := m.reader.Read(headerBuf); err != nil {
 			return err
@@ -370,7 +388,15 @@ func (m *mp3Parser) parseMP3Header() error {
 	//   2 - Layer description
 	//   1 - Protection bit (boolean)
 	//   4 - Bitrate index
-	fields, err := bit.NewReader(bytes.NewReader(headerBuf)).ReadFields(11, 2, 2, 1, 4, 2, 1, 1, 2)
+	//   2 - Sample rate index
+	//   1 - Padding (boolean)
+	//   1 - Private (boolean)
+	//   2 - Channel mode index
+	//   2 - Mode extension
+	//   1 - Copyright (boolean)
+	//   1 - Original (boolean)
+	//   2 - Emphasis
+	fields, err := bit.NewReader(bytes.NewReader(headerBuf)).ReadFields(11, 2, 2, 1, 4, 2, 1, 1, 2, 2, 1, 1, 2)
 	if err != nil {
 		return err
 	}
@@ -385,6 +411,10 @@ func (m *mp3Parser) parseMP3Header() error {
 		Padding:       fields[6] == 1,
 		Private:       fields[7] == 1,
 		ChannelMode:   uint8(fields[8]),
+		ModeExtension: uint8(fields[9]),
+		Copyright:     fields[10] == 1,
+		Original:      fields[11] == 1,
+		Emphasis:      uint8(fields[12]),
 	}
 
 	// Check to make sure we are parsing MPEG Version 1, Layer 3
@@ -407,7 +437,40 @@ func (m *mp3Parser) parseMP3Header() error {
 		}
 	}
 
+	// Search for "Xing" header, to help calculate duration
+	index := bytes.Index(headerBuf, mp3XingMarker)
+	if index == -1 {
+		// Search for "Info" header, which may also be present
+		index = bytes.Index(headerBuf, mp3InfoMarker)
+		if index == -1 {
+			// No Xing or Info header, must calculate duration via LENGTH tag
+			return nil
+		}
+	}
+
+	// Re-slice forward and begin reading data we want from the Xing header, skipping
+	// over the flags to directly read data
+	headerBuf = headerBuf[index+len(mp3XingMarker)+4:]
+	m.xingHeader = &mp3XingHeader{
+		FrameCount: binary.BigEndian.Uint32(headerBuf[0:4]),
+		StreamSize: binary.BigEndian.Uint32(headerBuf[4:8]),
+	}
+
+	// Calculate file duration and VBR bitrate using Xing/Info header data
+	// Thanks: https://github.com/taglib/taglib/blob/master/taglib/mpeg/mpegproperties.cpp#L212
+	m.xingHeader.Duration = int((float64(mp3SamplesPerFrame) / float64(m.SampleRate())) * float64(m.xingHeader.FrameCount))
+	m.xingHeader.Bitrate = int(float64(m.xingHeader.StreamSize*8) / float64(m.xingHeader.Duration) / 1000)
+
 	return nil
+}
+
+// mp3XingHeader represents additional information contained within a Xing header, used to
+// help parse MP3 duration
+type mp3XingHeader struct {
+	FrameCount uint32
+	StreamSize uint32
+	Duration   int
+	Bitrate    int
 }
 
 // mp3Header represents a MP3 audio stream header, and contains information about the stream
@@ -420,6 +483,10 @@ type mp3Header struct {
 	Padding       bool
 	Private       bool
 	ChannelMode   uint8
+	ModeExtension uint8
+	Copyright     bool
+	Original      bool
+	Emphasis      uint8
 }
 
 // mp3BitrateMap maps MPEG Layer 3 Version 1 bitrate to its actual rate
