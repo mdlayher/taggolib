@@ -261,6 +261,7 @@ func (m *mp3Parser) parseID3v2Frames() error {
 	frameBuf := make([]byte, 4)
 	var frameLength uint32
 	tagBuf := make([]byte, 2048)
+	var bufLen uint32 = uint32(len(tagBuf))
 
 	// Byte slices which should be trimmed and discarded from prefix or suffix
 	trimPrefix := []byte{255, 254}
@@ -301,8 +302,8 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			return err
 		}
 
-		// If frame is APIC, or "attached picture", seek past the picture
-		if bytes.Equal(frameBuf, mp3APICFrame) {
+		// If frame is attached picture OR frame is too long for buffer, seek past it
+		if bytes.Equal(frameBuf, mp3APICFrame) || frameLength > bufLen {
 			// Seek past picture data and continue loop
 			if _, err := m.reader.Seek(int64(frameLength), 1); err != nil {
 				return err
