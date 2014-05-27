@@ -2,8 +2,10 @@ package taggolib
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -43,6 +45,30 @@ var (
 		return file
 	}()
 )
+
+// ExampleNew provides example usage of taggolib, and is used to provide example code in GoDoc
+func ExampleNew() {
+	// taggolib accepts io.ReadSeeker, so we will use a media file in the filesystem
+	file, err := os.Open("./test/tone16bit.flac")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	// Parse audio metadata using taggolib
+	audio, err := New(file)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Print some basic metadata
+	fmt.Printf("%s - %s - %s", audio.Artist(), audio.Album(), audio.Title())
+
+	// Output:
+	// Artist - Album - Title
+}
 
 // TestNew verifies that New creates the proper parser for an example input stream
 func TestNew(t *testing.T) {
