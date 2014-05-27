@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -45,8 +46,8 @@ func main() {
 				return nil
 			}
 
-			// Check for unsupported version or invalid stream, which will be logged and skipped
-			if taggolib.IsUnsupportedVersion(err) || taggolib.IsInvalidStream(err) {
+			// Check for unsupported version, invalid stream, or EOF, which will be logged and skipped
+			if taggolib.IsUnsupportedVersion(err) || taggolib.IsInvalidStream(err) || err == io.EOF {
 				fmt.Println("taggo:", err, ":", path)
 				return nil
 			}
