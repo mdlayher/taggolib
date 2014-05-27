@@ -468,6 +468,11 @@ func (m *mp3Parser) parseMP3Header() error {
 	m.xingHeader.Duration = int((float64(mp3SamplesPerFrame) / float64(m.SampleRate())) * float64(m.xingHeader.FrameCount))
 	m.xingHeader.Bitrate = int(float64(m.xingHeader.StreamSize*8) / float64(m.xingHeader.Duration) / 1000)
 
+	// If bitrate calculated is above 320, correct it to 320, per specification
+	if m.xingHeader.Bitrate > 320 {
+		m.xingHeader.Bitrate = 320
+	}
+
 	return nil
 }
 
