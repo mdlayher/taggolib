@@ -58,7 +58,7 @@ func (o oggVorbisParser) BitDepth() int {
 
 // Bitrate calculates the audio bitrate for this stream
 func (o oggVorbisParser) Bitrate() int {
-	// TODO: see how max/min bitrate play into calculations
+	// BUG(mdlayher): Ogg Vorbis: check if maximum/minimum bitrate from headers should be used in calculation
 	return int(o.idHeader.NomBitrate) / 1000
 }
 

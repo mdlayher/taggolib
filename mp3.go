@@ -318,7 +318,7 @@ func (m *mp3Parser) parseID3v2Frames() error {
 		}
 
 		// Trim leading bytes such as UTF-8 BOM, garbage bytes, trim trailing nil
-		// TODO: handle encodings that aren't UTF-8, stored in tagBuf[0]
+		// BUG(mdlayher): MP3: handle ID3 tag encodings that aren't UTF-8, stored in tagBuf[0]
 		tag := string(bytes.TrimPrefix(bytes.TrimSuffix(tagBuf[1:n], trimSuffix), trimPrefix))
 
 		// Map frame title to tag title, store frame data
