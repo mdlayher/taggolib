@@ -46,7 +46,7 @@ var (
 	}()
 )
 
-// ExampleNew provides example usage of taggolib, and is used to provide example code in GoDoc
+// ExampleNew provides example usage of taggolib, using a media file from the filesystem.
 func ExampleNew() {
 	// taggolib accepts io.ReadSeeker, so we will use a media file in the filesystem
 	file, err := os.Open("./test/tone16bit.flac")
