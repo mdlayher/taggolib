@@ -57,6 +57,12 @@ func (f flacParser) BitDepth() int {
 
 // Bitrate calculates the audio bitrate for this stream
 func (f flacParser) Bitrate() int {
+	// Check for zero duration or end position, to prevent a division-by-zero panic
+	seconds := f.Duration().Seconds()
+	if f.endPos == 0 || seconds == 0 {
+		return 0
+	}
+
 	return int(((f.endPos * 8) / int64(f.Duration().Seconds())) / 1024)
 }
 
@@ -139,7 +145,7 @@ func (f flacParser) TrackNumber() int {
 func newFLACParser(reader io.ReadSeeker) (*flacParser, error) {
 	// Create FLAC parser
 	parser := &flacParser{
-		buffer: make([]byte, 256),
+		buffer: make([]byte, 2048),
 		reader: reader,
 	}
 
