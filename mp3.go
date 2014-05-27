@@ -216,15 +216,6 @@ func (m *mp3Parser) parseID3v2Header() error {
 		}
 	}
 
-	// Unsychronization is currently not supported
-	if m.id3Header.Unsynchronization {
-		return TagError{
-			Err:     errUnsupportedVersion,
-			Format:  m.Format(),
-			Details: "ID3 unsynchronization is not supported",
-		}
-	}
-
 	// Ensure Footer boolean is not defined prior to ID3v2.4
 	if m.id3Header.MajorVersion < 4 && m.id3Header.Footer {
 		return TagError{
