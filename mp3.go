@@ -374,8 +374,15 @@ func (m *mp3Parser) parseMP3Header() error {
 		// Search for byte 255
 		index := bytes.Index(headerBuf, []byte{255})
 		if index != -1 {
-			// We have encountered the header, re-slice forward to its index
-			headerBuf = headerBuf[index:]
+			// We have encountered the header, re-slice forward to its index, and read 64 more
+			// bytes to ensure that the Xing header is retrieved
+			tempBuf := make([]byte, 64)
+			if _, err := m.reader.Read(tempBuf); err != nil {
+				return err
+			}
+
+			// Append buffers to add Xing header
+			headerBuf = append(headerBuf[index:], tempBuf...)
 			break
 		}
 	}
