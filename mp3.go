@@ -280,8 +280,14 @@ func (m *mp3Parser) parseID3v2Frames() error {
 
 		// If byte 255 discovered, we have reached the start of the MP3 header
 		if frameBuf[0] == byte(255) {
-			// Pre-seed the current data as a bytes reader, to parse MP3 header
-			m.reader = bytes.NewReader(frameBuf)
+			// Read in more bytes to enable fetching the Xing header
+			if _, err := m.reader.Read(tagBuf); err != nil {
+				return err
+			}
+
+			// Pre-seed the current data as a bytes reader, to parse MP3 header, while also
+			// appending more bytes to find the Xing header
+			m.reader = bytes.NewReader(append(frameBuf, tagBuf...))
 			break
 		}
 
