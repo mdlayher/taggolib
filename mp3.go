@@ -368,7 +368,7 @@ type mp3ID3v2ExtendedHeader struct {
 func (m *mp3Parser) parseMP3Header() error {
 	// Read buffers continuously until we reach end of padding section, and find the
 	// MP3 header, which starts with byte 255
-	headerBuf := make([]byte, 1024)
+	headerBuf := make([]byte, 4096)
 	for {
 		if _, err := m.reader.Read(headerBuf); err != nil {
 			return err
