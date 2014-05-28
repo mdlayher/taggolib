@@ -303,7 +303,7 @@ func (m *mp3Parser) parseID3v2Frames() error {
 
 			// Store frame length
 			// Thanks: https://github.com/ascherkus/go-id3/blob/master/src/id3/id3v22.go#L24
-			frameLength = uint32(tagBuf[0]) << 16 | uint32(tagBuf[1]) << 8 | uint32(tagBuf[2])
+			frameLength = uint32(tagBuf[0])<<16 | uint32(tagBuf[1])<<8 | uint32(tagBuf[2])
 		} else {
 			// Read 4 bytes as uint32 to parse length
 			if err := binary.Read(m.reader, binary.BigEndian, &frameLength); err != nil {
