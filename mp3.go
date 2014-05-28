@@ -208,7 +208,7 @@ func (m *mp3Parser) parseID3v2Header() error {
 	}
 
 	// Ensure ID3v2 version is supported
-	if m.id3Header.MajorVersion != 3 && m.id3Header.MajorVersion != 4 {
+	if m.id3Header.MajorVersion < 2 || m.id3Header.MajorVersion > 4 {
 		return TagError{
 			Err:     errUnsupportedVersion,
 			Format:  m.Format(),
@@ -248,8 +248,17 @@ func (m *mp3Parser) parseID3v2Frames() error {
 	// Store discovered tags in map
 	tagMap := map[string]string{}
 
+	// Allocate a buffer to store frame titles
+	//   - ID3v2.2:  3 bytes
+	//   - ID3v2.3+: 4 bytes
+	var frameBuf []byte
+	if m.id3Header.MajorVersion == 2 {
+		frameBuf = make([]byte, 3)
+	} else {
+		frameBuf = make([]byte, 4)
+	}
+
 	// Create buffers for frame information
-	frameBuf := make([]byte, 4)
 	var frameLength uint32
 	tagBuf := make([]byte, 2048)
 	var bufLen = uint32(len(tagBuf))
@@ -284,13 +293,27 @@ func (m *mp3Parser) parseID3v2Frames() error {
 		}
 
 		// Parse the length of the frame data
-		if err := binary.Read(m.reader, binary.BigEndian, &frameLength); err != nil {
-			return err
-		}
+		//   - ID3v2.2:  24-bit integer, big endian
+		//   - ID3v2.3+: 32-bit integer, big endian
+		if m.id3Header.MajorVersion == 2 {
+			// Read 3 bytes to parse length
+			if _, err := m.reader.Read(tagBuf[:3]); err != nil {
+				return err
+			}
 
-		// Skip over frame flags
-		if _, err := m.reader.Seek(2, 1); err != nil {
-			return err
+			// Store frame length
+			// Thanks: https://github.com/ascherkus/go-id3/blob/master/src/id3/id3v22.go#L24
+			frameLength = uint32(tagBuf[0]) << 16 | uint32(tagBuf[1]) << 8 | uint32(tagBuf[2])
+		} else {
+			// Read 4 bytes as uint32 to parse length
+			if err := binary.Read(m.reader, binary.BigEndian, &frameLength); err != nil {
+				return err
+			}
+
+			// ID3v2.3+: Skip over frame flags
+			if _, err := m.reader.Seek(2, 1); err != nil {
+				return err
+			}
 		}
 
 		// If frame is attached picture OR frame is too long for buffer, seek past it
@@ -324,6 +347,17 @@ func (m *mp3Parser) parseID3v2Frames() error {
 
 // mp3ID3v2FrameToTag maps a MP3 ID3v2 frame title to its actual tag name
 var mp3ID3v2FrameToTag = map[string]string{
+	// ID3v2.2
+	"TAL": tagAlbum,
+	"TRK": tagTrackNumber,
+	"TP1": tagArtist,
+	"TP2": tagAlbumArtist,
+	"TT2": tagTitle,
+	"TYE": tagDate,
+	"TPA": tagDiscNumber,
+	"TCO": tagGenre,
+
+	// ID3v2.3+
 	"COMM": tagComment,
 	"TALB": tagAlbum,
 	"TCON": tagGenre,
@@ -449,6 +483,7 @@ func (m *mp3Parser) parseMP3Header() error {
 		index = bytes.Index(headerBuf, mp3InfoMarker)
 		if index == -1 {
 			// No Xing or Info header, must calculate duration via LENGTH tag
+			// BUG(mdlayher): MP3: Duration of CBR files must be calculated by finding last MP3 frame header
 			return nil
 		}
 	}
