@@ -1,4 +1,4 @@
-taggolib [![Build Status](https://travis-ci.org/mdlayher/taggolib.svg?branch=master)](https://travis-ci.org/mdlayher/taggolib) [![GoDoc](http://godoc.org/github.com/mdlayher/taggolib?status.png)](http://godoc.org/github.com/mdlayher/taggolib)
+taggolib [![Build Status](https://travis-ci.org/mdlayher/taggolib.svg?branch=master)](https://travis-ci.org/mdlayher/taggolib) [![GoDoc](http://godoc.org/github.com/mdlayher/taggolib?status.svg)](http://godoc.org/github.com/mdlayher/taggolib)
 ========
 
 taggolib is a Go package which provides read-only access to metadata contained in various audio formats.  MIT Licensed.
