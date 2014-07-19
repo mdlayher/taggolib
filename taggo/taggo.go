@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jesseward/taggolib"
+	"github.com/mdlayher/taggolib"
 )
 
 func main() {
