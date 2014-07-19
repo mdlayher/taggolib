@@ -116,7 +116,7 @@ func (f flacParser) Genre() string {
 	return f.tags[tagGenre]
 }
 
-// Publisher returns the Publsher (record-label) tag for this stream
+// Publisher returns the Publisher (record-label) tag for this stream
 func (f flacParser) Publisher() string {
 	return f.tags[tagPublisher]
 }
