@@ -98,6 +98,11 @@ func TestMP3(t *testing.T) {
 			t.Fatalf("mismatched property SampleRate: %v", mp3.SampleRate())
 		}
 
+		// Publisher
+		if mp3.Publisher() != "" {
+			t.Fatalf("mismatched tag Publisher: %v", mp3.Publisher())
+		}
+
 		// Title
 		if mp3.Title() != "Title" {
 			t.Fatalf("mismatched tag Title: %v", mp3.Title())
