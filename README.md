@@ -25,7 +25,7 @@ method with no parameters. A basic example script can be found at [cmd/taggo/tag
 media files it recognizes.
 
 ```
-$ cd taggo
+$ cd cmd/taggo
 $ go build
 $ ./taggo /home/matt/Music/
 Jimmy Eat World - Bleed American - Bleed American [#1.01] [03:01] [FLAC/1060kbps/16bit/44kHz]
