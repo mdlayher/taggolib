@@ -93,7 +93,7 @@ func TestFLAC(t *testing.T) {
 
 	// Publisher
 	if flac.Publisher() != "Publisher" {
-		t.Fatalf("mismatched tag Publisher: %v", flac.Title())
+		t.Fatalf("mismatched tag Publisher: %v", flac.Publisher())
 	}
 
 	// Title
