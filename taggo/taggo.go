@@ -18,10 +18,12 @@ func main() {
 		return
 	}
 
-	// Verify path actually exists
-	if _, err := os.Stat(os.Args[1]); err != nil {
-		fmt.Println("taggo:", err)
-		return
+	// Verify all paths actually exist
+	for _, p := range os.Args[1:] {
+		if _, err := os.Stat(p); err != nil {
+			fmt.Println("taggo:", err)
+			return
+		}
 	}
 
 	// Invoke a recursive file walk on all parameter directories
