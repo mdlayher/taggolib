@@ -20,7 +20,7 @@ Example
 =======
 
 taggolib has a very simple interface, and many tags can be accessed by simply calling an appropriately-named
-method with no parameters. A basic example script can be found at [taggo/taggo.go](https://github.com/mdlayher/taggolib/blob/master/taggo/taggo.go).
+method with no parameters. A basic example script can be found at [taggo/taggo.go](https://github.com/mdlayher/taggolib/blob/master/cmd/taggo/taggo.go).
 `taggo` will perform a recursive walk on a specified parameter directory, and print out information about any
 media files it recognizes.
 
