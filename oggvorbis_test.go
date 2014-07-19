@@ -93,7 +93,7 @@ func TestOGGVorbis(t *testing.T) {
 
 	// Publisher
 	if ogg.Publisher() != "Publisher" {
-		t.Fatalf("mismatched tag Pubisher: %v", ogg.Publisher())
+		t.Fatalf("mismatched tag Publisher: %v", ogg.Publisher())
 	}
 
 	// Title
