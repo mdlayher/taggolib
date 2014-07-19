@@ -116,6 +116,11 @@ func (f flacParser) Genre() string {
 	return f.tags[tagGenre]
 }
 
+// Publisher returns the Publsher (record-label) tag for this stream
+func (f flacParser) Publisher() string {
+	return f.tags[tagPublisher]
+}
+
 // SampleRate returns the sample rate in Hertz for this stream
 func (f flacParser) SampleRate() int {
 	return int(f.properties.SampleRate)

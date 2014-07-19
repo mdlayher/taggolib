@@ -17,6 +17,7 @@ const (
 	tagDate        = "DATE"
 	tagDiscNumber  = "DISCNUMBER"
 	tagGenre       = "GENRE"
+	tagPublisher   = "PUBLISHER"
 	tagTitle       = "TITLE"
 	tagTrackNumber = "TRACKNUMBER"
 )
@@ -99,6 +100,7 @@ type Parser interface {
 	Date() string
 	DiscNumber() int
 	Genre() string
+	Publisher() string
 	Title() string
 	TrackNumber() int
 

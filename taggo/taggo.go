@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mdlayher/taggolib"
+	"github.com/jesseward/taggolib"
 )
 
 func main() {
@@ -62,9 +62,9 @@ func main() {
 			seconds = seconds - (minutes * 60)
 
 			// Print information about file
-			fmt.Printf("%s - %s - %s [#%d.%02d] [%02d:%02d] [%s/%dkbps/%dbit/%dkHz]\n",
+			fmt.Printf("%s - %s - %s [#%d.%02d] [%02d:%02d] [%s/%dkbps/%dbit/%dkHz] [%s]\n",
 				audio.Artist(), audio.Album(), audio.Title(), audio.DiscNumber(), audio.TrackNumber(),
-				minutes, seconds, audio.Format(), audio.Bitrate(), audio.BitDepth(), audio.SampleRate()/1000)
+				minutes, seconds, audio.Format(), audio.Bitrate(), audio.BitDepth(), audio.SampleRate()/1000, audio.Publisher())
 
 			return nil
 		})

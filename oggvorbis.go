@@ -107,6 +107,11 @@ func (o oggVorbisParser) Genre() string {
 	return o.tags[tagGenre]
 }
 
+// Publisher returns the Publisher (record-label) tag for this stream
+func (o oggVorbisParser) Publisher() string {
+	return o.tags[tagPublisher]
+}
+
 // SampleRate returns the sample rate in Hertz for this stream
 func (o oggVorbisParser) SampleRate() int {
 	return int(o.idHeader.SampleRate)
