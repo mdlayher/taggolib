@@ -128,6 +128,11 @@ func (m mp3Parser) Genre() string {
 	return m.tags[tagGenre]
 }
 
+// Publisher returns the Publisher (record-label) tag for this stream
+func (m mp3Parser) Publisher() string {
+	return m.tags[tagPublisher]
+}
+
 // SampleRate returns the sample rate in Hertz for this stream
 func (m mp3Parser) SampleRate() int {
 	return mp3SampleRateMap[m.mp3Header.SampleRate]
@@ -367,6 +372,7 @@ var mp3ID3v2FrameToTag = map[string]string{
 	"TPE1": tagArtist,
 	"TPE2": tagAlbumArtist,
 	"TPOS": tagDiscNumber,
+	"TPUB": tagPublisher,
 	"TRCK": tagTrackNumber,
 	"TSSE": mp3TagEncoder,
 	"TYER": tagDate,

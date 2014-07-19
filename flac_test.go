@@ -91,6 +91,11 @@ func TestFLAC(t *testing.T) {
 		t.Fatalf("mismatched property SampleRate: %v", flac.SampleRate())
 	}
 
+	// Publisher
+	if flac.Publisher() != "Publisher" {
+		t.Fatalf("mismatched tag Publisher: %v", flac.Title())
+	}
+
 	// Title
 	if flac.Title() != "Title" {
 		t.Fatalf("mismatched tag Title: %v", flac.Title())

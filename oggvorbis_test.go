@@ -91,6 +91,11 @@ func TestOGGVorbis(t *testing.T) {
 		t.Fatalf("mismatched property SampleRate: %v", ogg.SampleRate())
 	}
 
+	// Publisher
+	if ogg.Publisher() != "Publisher" {
+		t.Fatalf("mismatched tag Pubisher: %v", ogg.Publisher())
+	}
+
 	// Title
 	if ogg.Title() != "Title" {
 		t.Fatalf("mismatched tag Title: %v", ogg.Title())
