@@ -10,7 +10,6 @@ import (
 func TestMP3(t *testing.T) {
 	// Slices of values which differ between MP3 variants
 	bitrates := []int{32, 320, 88}
-	dates := []string{"", "2014-01-01", ""}
 	encoders := []string{"Lavf53.21.1", "MP3FS", "Lavf53.21.1"}
 
 	// Check all available variants of MP3
@@ -64,7 +63,7 @@ func TestMP3(t *testing.T) {
 		}
 
 		// Date
-		if mp3.Date() != dates[i] {
+		if mp3.Date() != "2014-01-01" {
 			t.Fatalf("mismatched tag Date: %v", mp3.Date())
 		}
 
@@ -99,7 +98,7 @@ func TestMP3(t *testing.T) {
 		}
 
 		// Publisher
-		if mp3.Publisher() != "" {
+		if mp3.Publisher() != "Publisher" {
 			t.Fatalf("mismatched tag Publisher: %v", mp3.Publisher())
 		}
 
