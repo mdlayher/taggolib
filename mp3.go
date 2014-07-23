@@ -41,6 +41,17 @@ type mp3Parser struct {
 	xingHeader *mp3XingHeader
 }
 
+// taggolib issue #3 - ID3v2.4 requires use of synch-safe frameLength values
+// taken from github.com/ascherkus/go-id3/blob/master/src/id3/util.go
+func unSynch(data [4]byte) int32 {
+	size := int32(0)
+	for i, b := range data {
+		shift := uint32(len(data)-i-1) * 7
+		size |= int32(b&0x7f) << shift
+	}
+	return size
+}
+
 // Album returns the Album tag for this stream
 func (m mp3Parser) Album() string {
 	return m.tags[tagAlbum]
@@ -313,6 +324,13 @@ func (m *mp3Parser) parseID3v2Frames() error {
 			// Read 4 bytes as uint32 to parse length
 			if err := binary.Read(m.reader, binary.BigEndian, &frameLength); err != nil {
 				return err
+			}
+
+			// ID3v2.4 frame lengths are synch-safe integers unless otherwise specified in ID3v2 header
+			if m.id3Header.MajorVersion == 4 && !m.id3Header.Unsynchronization {
+				b := [4]byte{}
+				binary.BigEndian.PutUint32(b[:], uint32(frameLength))
+				frameLength = uint32(unSynch(b))
 			}
 
 			// ID3v2.3+: Skip over frame flags
